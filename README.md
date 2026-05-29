@@ -57,8 +57,8 @@ graph TD
 2.  或者通过任一静态 Web 服务启动（如 `python3 -m http.server 8000`）。
 3.  点击浏览器地址栏的“安装”图标，一键将 `DevZen` 添加至你的系统应用图标中，随时 offline 畅享。
 
-### 方式 B：开发者模式·开启生成式 AI 仿生脑
-若要解锁**自由汇报文本输入**并由本地 LLM 实时诊断反馈：
+### 方式 B：开发者模式·开启生成式 AI 仿生脑 (本地代理服务)
+若要解锁**自由汇报文本输入**并由本地代理服务器配合 LLM 实时诊断反馈：
 1.  **启动 API 服务器**：
     ```bash
     python3 toolchain/server.py
@@ -66,6 +66,25 @@ graph TD
 2.  **配置 LLM API**：
     编辑 `toolchain/llm_compiler.py`，配置您的本地大模型服务或云端 API KEY（如 Gemini / OpenAI / DeepSeek / Ollama）。
 3.  在游戏第三版块切换模式为 **“生成式 AI 对齐模式”**，即可开始与李总展开充满博弈的文字大乱斗！
+
+### 方式 C：完全 Serverless 浏览器直连大模型（含 Ollama 本地运行指南）
+> **无需搭建任何 Python 后端服务，纯静态托管（如 GitHub Pages）也能解锁无限 AI 关卡与实时 Boss 对白！**
+
+1.  **打开配置中心**：
+    *   在游戏头部导航栏中，点击发光紫色的 **「AI 灵境配置」** 齿轮按钮。
+2.  **配置 API 密钥**：
+    *   **在线大模型（Gemini / OpenAI / DeepSeek）**：在提供商下拉框中选择对应厂商，填入您的 API 密钥（API Key），自定义代理地址根据需要选填。密钥将**纯本地加密存储在您的浏览器 LocalStorage 中，绝不上传到任何中转服务器**，100% 绝对安全！
+    *   **本地免费离线运行（Ollama）**：
+        1. 本地启动您的 Ollama：`ollama run llama3` (或其它微型代码大模型)。
+        2. 在 DevZen 灵境配置中选择 **Ollama Local**，服务地址（Endpoint）保持为默认的 `http://localhost:11434/v1`（密钥无需填写）。
+        3. 💡 *注意*：若浏览器因跨域（CORS）限制无法访问 Ollama，请在启动 Ollama 时配置环境变量允许跨域：
+           * macOS/Linux: `OLLAMA_ORIGINS="*" ollama serve`
+           * Windows: 在系统环境变量中添加 `OLLAMA_ORIGINS` 值为 `*`，然后重启 Ollama。
+3.  点击 **「保存配置」**。大促秒杀和李总对齐将瞬间接通大模型，带给您完全自主、随机生成且零服务器开销的极客体验！
+
+### 方式 D：UGC 关卡自定义导入（拖拽即玩）
+*   游戏第二版块（混沌侦探）新增了 **「导入自定义关卡」** 按钮。
+*   玩家可将任何符合标准极简规范的本地 JSON 故障配置文件直接上传，系统将在前台秒级渲染并动态装配出高保真的 Linux 终端排障关卡！
 
 ---
 
