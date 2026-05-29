@@ -1318,6 +1318,13 @@
             <p class="logo-subtitle">Commute Dev Zen Survivor</p>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="action-secondary-btn" style="padding: 4px 10px; font-size: 11px; gap: 4px; display: flex; align-items: center; background: rgba(139, 92, 246, 0.15); border-color: var(--color-primary);" onclick="toggleLlmSettingsModal()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                AI 灵境配置
+            </button>
             <div class="commute-offline-badge" id="pwaOfflineBadge" title="极客离线通勤就绪：静态文件与大厂漏洞API已被服务工作线程全量拦截缓存！">
                 <span class="offline-dot"></span>
                 <span class="offline-text" id="pwaOfflineText">正在加载通勤包...</span>
@@ -2666,6 +2673,80 @@
                 });
         }
 
+                async function callDirectLlm(systemPrompt, userPrompt) {
+            const configStr = localStorage.getItem("devzen_llm_config");
+            if (!configStr) return null;
+            
+            const config = JSON.parse(configStr);
+            if (!config.provider || config.provider === "none") return null;
+            
+            let url = "";
+            let headers = { "Content-Type": "application/json" };
+            let body = {};
+            
+            const provider = config.provider;
+            const apiKey = config.apiKey || "";
+            let endpoint = config.endpoint || "";
+            
+            if (provider === "gemini") {
+                // Google Gemini beta content API
+                if (!endpoint) endpoint = "https://generativelanguage.googleapis.com/v1beta";
+                url = `${endpoint}/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                body = {
+                    contents: [{
+                        parts: [{
+                            text: systemPrompt + "\n\n" + userPrompt
+                        }]
+                    }]
+                };
+            } else if (provider === "openai" || provider === "deepseek" || provider === "ollama") {
+                if (provider === "openai" && !endpoint) endpoint = "https://api.openai.com/v1";
+                if (provider === "deepseek" && !endpoint) endpoint = "https://api.deepseek.com/v1";
+                if (provider === "ollama" && !endpoint) endpoint = "http://localhost:11434/v1";
+                
+                url = `${endpoint}/chat/completions`;
+                if (apiKey) {
+                    headers["Authorization"] = `Bearer ${apiKey}`;
+                }
+                
+                let model = "gpt-4o-mini";
+                if (provider === "deepseek") model = "deepseek-chat";
+                if (provider === "ollama") model = "llama3";
+                
+                body = {
+                    model: model,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    response_format: { type: "json_object" }
+                };
+            }
+            
+            const response = await fetch(url, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) {
+                throw new Error("HTTP error " + response.status);
+            }
+            
+            const resData = await response.json();
+            let textResult = "";
+            
+            if (provider === "gemini") {
+                textResult = resData.candidates[0].content.parts[0].text;
+            } else {
+                textResult = resData.choices[0].message.content;
+            }
+            
+            // Clean markdown indicators if any
+            textResult = textResult.replace(/```json/g, "").replace(/```/g, "").trim();
+            return JSON.parse(textResult);
+        }
+
         function summonAiChallenge() {
             const summonBtn = document.getElementById("btnSummonChallenge");
             const langSelect = document.getElementById("summonLang");
@@ -2677,116 +2758,127 @@
             const lang = langSelect.value;
             const category = categorySelect.value;
             
-            // 1. 锁死按钮，进入 loading 态，防止重复触发
             summonBtn.disabled = true;
             summonBtn.classList.add("loading");
-            summonBtn.innerText = "🔮 虚空编译器鸣响中...";
+            summonBtn.innerText = "🔮 虚空大模型对齐中...";
             
-            // 2. 播发起手声效 (低频共振)
             AudioSynth.playTick(600, 0.15, 0.1);
             
-            // 3. 向极客终端高亮输出雷达扫描日志
             const langLabel = langSelect.options[langSelect.selectedIndex].text;
             const catLabel = categorySelect.options[categorySelect.selectedIndex].text;
             
             printTerminalLine(`[INFO] 正在定位虚空维度坐标... (Language: ${langLabel}, Category: ${catLabel})`, "log-info");
             
-            // 4. 模拟动态编译步骤日志，黑客仪式感拉满！
-            setTimeout(() => {
-                printTerminalLine("[INFO] 正在向 AI 编译器注入仿生自愈算法，热编译漏洞关卡...", "log-info");
-            }, 500);
-            
-            // 5. 发起 POST 异步生成请求
-            fetch("/api/generate_challenge", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    language: lang,
-                    category: category
+            setTimeout(async () => {
+                printTerminalLine("[INFO] 正在注入大模型编译算法，请求热编译漏洞关卡...", "log-info");
+                
+                // 1. First attempt: Direct client-side LLM call if configured
+                try {
+                    const configStr = localStorage.getItem("devzen_llm_config");
+                    if (configStr) {
+                        const config = JSON.parse(configStr);
+                        if (config.provider && config.provider !== "none") {
+                            printTerminalLine(`[INFO] 启用直连大模型召唤模式: ${config.provider}...`, "log-info");
+                            
+                            const random_hash = Math.random().toString(16).substr(2, 6);
+                            const random_sha = Math.random().toString(16).substr(2, 7);
+                            
+                            const systemPrompt = `你正在扮演《DevZen》高阶极客排障游戏中的 AI 漏洞编译器。
+你必须动态合成并输出一个高保真的解谜关卡，格式必须为 100% 严谨的 JSON，绝对不要带有任何 Markdown 格式标记（如 \`\`\`json），直接输出 JSON 实体。
+JSON 数据结构要求：
+{
+  "cardId": "generated-${random_hash}",
+  "project": "ai/dream-realm",
+  "commitSha": "${random_sha}",
+  "language": "${lang}",
+  "title": "[一个简短、充满科技感与行业实战感的中文标题]",
+  "codeSnippet": "[10到25行之间完整的、能直接阅读的代码。该代码中必须包含一处极隐蔽且必然产生致命运行错误的 Bug！]",
+  "bugLineIndex": [代码段中那行包含漏洞的代码行号 (0-indexed 索引值)],
+  "explanation": "[深入浅出的中文分析（150字以内）。详述此 Bug 的根本成因、后果及修复建议]"
+}`;
+                            const userPrompt = `生成一张排障卡牌。编程语言: ${lang}, 漏洞类别: ${category}.`;
+                            const card = await callDirectLlm(systemPrompt, userPrompt);
+                            
+                            if (card && card.title) {
+                                loadCardIntoUi(card);
+                                return;
+                            }
+                        }
+                    }
+                } catch (err) {
+                    printTerminalLine(`[WARN] 直连大模型召唤遭遇异常: ${err.message}。尝试自动降级为本地 Proxy 服务器召请...`, "log-warning");
+                }
+                
+                // 2. Second attempt: Fallback to local Python Proxy Server
+                fetch("/api/generate_challenge", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        language: lang,
+                        category: category
+                    })
                 })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error("AI 召唤失败");
-                return res.json();
-            })
-            .then(card => {
-                // 模拟 1.2 秒的召请延迟，让雷达打字机日志充分滚动，极客体验拉满！
-                setTimeout(() => {
-                    summonBtn.disabled = false;
-                    summonBtn.classList.remove("loading");
-                    summonBtn.innerText = "🔮 降维召请 AI 关卡";
-                    
-                    if (card && card.cardId) {
-                        // 1. 注入到全局的 casesDatabase
-                        detectiveState.casesDatabase[card.cardId] = card;
-                        
-                        // 2. 动态塞入 caseSelector 下拉菜单最前面 (紧随内置案例之后)
-                        const opt = document.createElement("option");
-                        opt.value = card.cardId;
-                        opt.innerText = `[AI 幻境] ${card.title} (Commit: ${card.commitSha})`;
-                        
-                        if (caseSelector.options.length > 1) {
-                            caseSelector.insertBefore(opt, caseSelector.options[1]);
-                        } else {
-                            caseSelector.appendChild(opt);
-                        }
-                        
-                        // 3. 自动热切换选定该新关卡并加载！
-                        caseSelector.value = card.cardId;
-                        changeDetectiveCase();
-                        
-                        // 4. 播放召请成功的振荡音效 (双音阶上扬)
-                        AudioSynth.playTick(1800, 0.08, 0.08);
-                        setTimeout(() => AudioSynth.playTick(2400, 0.06, 0.06), 80);
-                        
-                        printTerminalLine(`[SUCCESS] 成功从虚空维度召唤 ${langLabel} AI 高阶关卡！`, "log-success");
-                        printTerminalLine(`-> 案情标题: ${card.title} (Commit: ${card.commitSha})`, "log-success");
-                        printTerminalLine(`-> 诊断结论: 代码第 ${card.bugLineIndex + 1} 行已被 AI 确认为致命隐患点！请速前往排障！`, "log-info");
-                    }
-                }, 1200);
-            })
-            .catch(err => {
-                setTimeout(() => {
-                    summonBtn.disabled = false;
-                    summonBtn.classList.remove("loading");
-                    summonBtn.innerText = "🔮 降维召请 AI 关卡";
-                    printTerminalLine(`[ERROR] AI 编译器超时或离线。正在启动前端虚空引擎，热调用离线自愈预编译库...`, "log-danger");
-                    
+                .then(res => {
+                    if (!res.ok) throw new Error("API 响应失败");
+                    return res.json();
+                })
+                .then(card => {
+                    loadCardIntoUi(card);
+                })
+                .catch(err => {
+                    // 3. Third attempt: Fallback to precompiled offline library presets
+                    printTerminalLine(`[ERROR] AI 编译器超时或离线。启动离线自愈预编译库...`, "log-danger");
                     const offlineCard = offlinePresetsDatabase[lang] || offlinePresetsDatabase["java"];
-                    if (offlineCard && offlineCard.cardId) {
-                        detectiveState.casesDatabase[offlineCard.cardId] = offlineCard;
-                        
-                        // 检查下拉列表中是否已经有此离线关卡，防止重复添加
-                        let exists = false;
-                        for (let i = 0; i < caseSelector.options.length; i++) {
-                            if (caseSelector.options[i].value === offlineCard.cardId) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!exists) {
-                            const opt = document.createElement("option");
-                            opt.value = offlineCard.cardId;
-                            opt.innerText = `[自愈离线] ${offlineCard.title} (Commit: ${offlineCard.commitSha})`;
-                            if (caseSelector.options.length > 1) {
-                                caseSelector.insertBefore(opt, caseSelector.options[1]);
-                            } else {
-                                caseSelector.appendChild(opt);
-                            }
-                        }
-                        
-                        caseSelector.value = offlineCard.cardId;
-                        changeDetectiveCase();
-                        
-                        AudioSynth.playTick(1600, 0.1, 0.08);
-                        printTerminalLine(`[SUCCESS] [自愈离线预编译] 成功从本地虚空引擎调遣离线备份关卡！`, "log-success");
-                        printTerminalLine(`-> 案情标题: ${offlineCard.title} (Commit: ${offlineCard.commitSha})`, "log-success");
+                    if (offlineCard) {
+                        loadCardIntoUi(offlineCard, true);
                     }
-                }, 1000);
-            });
+                });
+                
+            }, 1000);
+        }
+
+        function loadCardIntoUi(card, isOffline = false) {
+            const summonBtn = document.getElementById("btnSummonChallenge");
+            const caseSelector = document.getElementById("caseSelector");
+            
+            summonBtn.disabled = false;
+            summonBtn.classList.remove("loading");
+            summonBtn.innerText = "🔮 降维召请 AI 关卡";
+            
+            if (card && card.cardId) {
+                detectiveState.casesDatabase[card.cardId] = card;
+                
+                // Check if already in selector to prevent duplicates
+                let exists = false;
+                for (let i = 0; i < caseSelector.options.length; i++) {
+                    if (caseSelector.options[i].value === card.cardId) {
+                        exists = true;
+                        break;
+                    }
+                }
+                
+                if (!exists) {
+                    const opt = document.createElement("option");
+                    opt.value = card.cardId;
+                    opt.innerText = `${isOffline ? '[自愈离线]' : '[AI 幻境]'} ${card.title} (Commit: ${card.commitSha})`;
+                    if (caseSelector.options.length > 1) {
+                        caseSelector.insertBefore(opt, caseSelector.options[1]);
+                    } else {
+                        caseSelector.appendChild(opt);
+                    }
+                }
+                
+                caseSelector.value = card.cardId;
+                changeDetectiveCase();
+                
+                AudioSynth.playTick(1800, 0.08, 0.08);
+                setTimeout(() => AudioSynth.playTick(2400, 0.06, 0.06), 80);
+                
+                printTerminalLine(`[SUCCESS] 成功加载漏洞卡牌！`, "log-success");
+                printTerminalLine(`-> 案情标题: ${card.title} (Commit: ${card.commitSha})`, "log-success");
+            }
         }
 
         function refreshVulnerabilities() {
@@ -3600,7 +3692,37 @@
             bossSpeechText.innerHTML = `<span style="color: var(--color-primary); font-style: italic; text-shadow: var(--glow-primary);">李总正在审阅您的汇报方案，思考深度博弈对策...</span>`;
 
             try {
-                const response = await fetch("http://localhost:8000/api/align", {
+                let data = null;
+                let usedDirectLlm = false;
+                const configStr = localStorage.getItem("devzen_llm_config");
+                
+                if (configStr) {
+                    const config = JSON.parse(configStr);
+                    if (config.provider && config.provider !== "none") {
+                        bossSpeechText.innerHTML = `<span style="color: var(--color-primary); font-style: italic; text-shadow: var(--glow-primary);">李总正在审阅您的汇报方案，思考深度博弈对策 (直连 ${config.provider} 大模型)...</span>`;
+                        
+                        const systemPrompt = `你正在扮演《DevZen》游戏中的业务总经理李总（一个狂热的 KPI 捍卫者，不懂底层技术，极其在乎预算、上线排期和商业价值）。
+玩家刚刚针对场景 "${simulatorState.scenario}" 给你递交了第 ${simulatorState.round}/3 轮的汇报方案：
+"${userSpeech}"
+
+请以李总第一人称苛刻、毒舌且重视商业对齐的管理者口吻，给玩家撰写一段对话反馈，并输出多维打分。
+你必须输出一个严谨的 JSON 实体，绝对不要包含任何 Markdown 格式标记（如 \`\`\`json 等），直接输出 JSON：
+{
+  "satisfaction_delta": [满意度改变量，整数 -30 到 +30],
+  "aggression_delta": [暴躁度改变量，整数 -30 到 +30],
+  "tech_taste_score": [技术品味得分，整数 0 到 10],
+  "business_sense_score": [商业思维得分，整数 0 到 10],
+  "eq_score": [情商得分，整数 0 到 10],
+  "reaction": "[以李总第一人称输出的极其逼真、刻薄好笑或满意称赞的中文对话文字。字数在 150 字以内。要求包含老板的小动作描述，如‘捏了捏眉心’、‘喝了口茶’]"
+}`;
+                        const userPrompt = `玩家汇报方案: "${userSpeech}"。请对方案进行审阅和博弈打分。`;
+                        data = await callDirectLlm(systemPrompt, userPrompt);
+                        usedDirectLlm = true;
+                    }
+                }
+                
+                if (!usedDirectLlm) {
+                    const response = await fetch("http://localhost:8000/api/align", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -3617,7 +3739,8 @@
                     throw new Error("HTTP error " + response.status);
                 }
 
-                const data = await response.json();
+                data = await response.json();
+                } // End of if(!usedDirectLlm) fetch block
                 
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = "向李总汇报";
@@ -3977,7 +4100,123 @@
                         console.log("ServiceWorker 注册成功，作用域: ", registration.scope);
                         
                         // 循环监控 SW 状态，一旦控制权接管，立刻亮起荧光绿状态呼吸灯
-                        const updatePwaBadge = () => {
+                                // ==========================================================================
+        // LLM settings & UGC imports Supporting JS Engine
+        // ==========================================================================
+        function toggleLlmSettingsModal() {
+            const modal = document.getElementById("aiSettingsModal");
+            if (!modal) return;
+            if (modal.style.display === "none" || modal.style.display === "") {
+                modal.style.display = "flex";
+                loadLlmSettings();
+            } else {
+                modal.style.display = "none";
+            }
+        }
+
+        function handleLlmProviderChange() {
+            const provider = document.getElementById("llmProvider").value;
+            const keyContainer = document.getElementById("llmKeyContainer");
+            const endpointContainer = document.getElementById("llmEndpointContainer");
+            const endpointInput = document.getElementById("llmEndpoint");
+            
+            if (provider === "none") {
+                keyContainer.style.display = "none";
+                endpointContainer.style.display = "none";
+            } else {
+                keyContainer.style.display = "flex";
+                endpointContainer.style.display = "flex";
+                
+                if (provider === "gemini") {
+                    endpointInput.placeholder = "默认使用谷歌官方通道，可留空或填自定义代理";
+                } else if (provider === "deepseek") {
+                    endpointInput.placeholder = "https://api.deepseek.com/v1";
+                } else if (provider === "openai") {
+                    endpointInput.placeholder = "https://api.openai.com/v1";
+                } else if (provider === "ollama") {
+                    endpointInput.placeholder = "http://localhost:11434/v1";
+                    keyContainer.style.display = "none"; // Ollama normally does not require API key
+                }
+            }
+        }
+
+        function saveLlmSettings() {
+            const provider = document.getElementById("llmProvider").value;
+            const apiKey = document.getElementById("llmApiKey").value.trim();
+            const endpoint = document.getElementById("llmEndpoint").value.trim();
+            
+            const config = { provider, apiKey, endpoint };
+            localStorage.setItem("devzen_llm_config", JSON.stringify(config));
+            
+            AudioSynth.playTick(1600, 0.08, 0.04);
+            alert("AI 灵境配置保存成功！");
+            toggleLlmSettingsModal();
+        }
+
+        function loadLlmSettings() {
+            const configStr = localStorage.getItem("devzen_llm_config");
+            if (!configStr) {
+                document.getElementById("llmProvider").value = "none";
+                handleLlmProviderChange();
+                return;
+            }
+            try {
+                const config = JSON.parse(configStr);
+                document.getElementById("llmProvider").value = config.provider || "none";
+                document.getElementById("llmApiKey").value = config.apiKey || "";
+                document.getElementById("llmEndpoint").value = config.endpoint || "";
+                handleLlmProviderChange();
+            } catch(e) {
+                console.error("加载 AI 配置异常", e);
+            }
+        }
+
+        function handleUgcImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const card = JSON.parse(evt.target.result);
+                    if (!card.title || !card.codeSnippet || typeof card.bugLineIndex !== 'number' || !card.explanation) {
+                        throw new Error("JSON 格式不符合 DevZen 混沌侦探卡牌标准！必须包含 title, codeSnippet, bugLineIndex, explanation 属性。");
+                    }
+                    if (!card.cardId) card.cardId = "ugc-" + Math.random().toString(16).substr(2, 6);
+                    if (!card.project) card.project = "ugc/local-import";
+                    if (!card.commitSha) card.commitSha = "local-dev";
+                    if (!card.language) card.language = "custom";
+                    
+                    detectiveState.casesDatabase[card.cardId] = card;
+                    const caseSelector = document.getElementById("caseSelector");
+                    const opt = document.createElement("option");
+                    opt.value = card.cardId;
+                    opt.innerText = `[UGC 导入] ${card.title}`;
+                    
+                    if (caseSelector.options.length > 1) {
+                        caseSelector.insertBefore(opt, caseSelector.options[1]);
+                    } else {
+                        caseSelector.appendChild(opt);
+                    }
+                    
+                    caseSelector.value = card.cardId;
+                    changeDetectiveCase();
+                    
+                    AudioSynth.playTick(1600, 0.08, 0.04);
+                    printTerminalLine(`[SUCCESS] 成功导入本地 UGC 故障关卡！`, "log-success");
+                    printTerminalLine(`-> 案情标题: ${card.title}`, "log-success");
+                } catch(err) {
+                    alert("导入失败: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize Settings on page load
+        setTimeout(() => {
+            loadLlmSettings();
+        }, 1000);
+
+        const updatePwaBadge = () => {
                             const badge = document.getElementById("pwaOfflineBadge");
                             const text = document.getElementById("pwaOfflineText");
                             
@@ -4019,5 +4258,56 @@
             if (text) text.innerText = "不支持离线通勤";
         }
     </script>
+
+    <!-- ==========================================================================
+       LLM Configuration Modal
+    ========================================================================== -->
+    <div class="modal-backdrop" id="aiSettingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 10, 16, 0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="glass-panel" style="width: 90%; max-width: 480px; padding: 28px; border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; box-shadow: 0 0 30px rgba(139, 92, 246, 0.15); animation: blueGlowPulse 3s infinite;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--color-primary); text-shadow: var(--glow-primary); display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    AI 灵境配置中心 (LocalStorage 安全存储)
+                </h3>
+                <button class="action-secondary-btn" style="padding: 4px 8px; font-size: 12px; border-radius: 4px;" onclick="toggleLlmSettingsModal()">✕</button>
+            </div>
+            
+            <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 20px; line-height: 1.5;">
+                💡 <b>安全提示</b>：API 密钥纯本地存储在您的浏览器缓存中，<strong>绝对不会</strong>上传到任何外部服务器，请放心配置。配置完成后，大促秒杀和李总对齐将直接调用选定大模型，解锁<strong>完全 Serverless 无限生成体验</strong>！
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--color-primary);">AI 模型提供商</label>
+                    <select id="llmProvider" class="form-control" style="background: rgba(15, 15, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 6px;" onchange="handleLlmProviderChange()">
+                        <option value="none">🔌 禁用本地 API（使用 Python 服务或离线自愈）</option>
+                        <option value="gemini">♊ Google Gemini (2.5 Flash)</option>
+                        <option value="deepseek">🐋 DeepSeek API (V3/Coder)</option>
+                        <option value="openai">🤖 OpenAI ChatGPT (GPT-4o/Mini)</option>
+                        <option value="ollama">🦙 Ollama Local (本地微型模型)</option>
+                    </select>
+                </div>
+                
+                <div id="llmKeyContainer" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--color-primary);">API 密钥 (API Key)</label>
+                    <input type="password" id="llmApiKey" class="form-control" style="background: rgba(15, 15, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 6px;" placeholder="输入大模型 API Key" />
+                </div>
+                
+                <div id="llmEndpointContainer" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--color-primary);">自定义代理/服务地址 (Endpoint URL)</label>
+                    <input type="text" id="llmEndpoint" class="form-control" style="background: rgba(15, 15, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 6px;" placeholder="https://api.openai.com/v1" />
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 16px;">
+                <button class="action-secondary-btn" style="padding: 8px 16px; font-weight: 600;" onclick="toggleLlmSettingsModal()">取消</button>
+                <button class="action-primary-btn" style="padding: 8px 20px; font-weight: 600;" onclick="saveLlmSettings()">💾 保存配置</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
