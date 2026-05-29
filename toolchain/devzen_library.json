@@ -1,0 +1,32 @@
+[
+  {
+    "cardId": "find-bug-spark-d5a8c2f",
+    "project": "apache/spark",
+    "commitSha": "d5a8c2f",
+    "language": "java",
+    "title": "Spark 序列化与连接池逃逸",
+    "codeSnippet": "public void processRdd(JavaRDD<Row> rdd) {\n    final DBConnection conn = DBConnectionPool.getConnection();\n    rdd.foreach(row -> {\n        // BUG: foreach 闭包中捕获了未序列化的外层连接连接实例！\n        conn.insert(row.getString(0));\n    });\n}",
+    "bugLineIndex": 2,
+    "explanation": "如果在 driver 端获取了 DBConnection 数据库连接实例，并直接在 rdd.foreach 闭包中引用，Spark 试图对闭包进行序列化传输到各个 Executor 执行。由于底层套接字 Socket/Connection 不可被序列化，会产生经典的 java.io.NotSerializableException。即使将其声明为 static，在序列化时也会导致垃圾对象内存膨胀甚至 OOM！正解是使用 foreachPartition 在各 Executor 本地构建连接池。"
+  },
+  {
+    "cardId": "find-bug-kafka-ca92b8d",
+    "project": "apache/kafka",
+    "commitSha": "ca92b8d",
+    "language": "java",
+    "title": "锁竞争导致并发死锁",
+    "codeSnippet": "public class ConnectionBroker {\n    private final Object lockA = new Object();\n    private final Object lockB = new Object();\n\n    public void sendMetadata(String client) {\n        synchronized(lockA) {\n            synchronized(lockB) {\n                doSend(client);\n            }\n        }\n    }\n\n    public void updateBroker(int brokerId) {\n        synchronized(lockB) {\n            synchronized(lockA) {\n                doUpdate(brokerId);\n            }\n        }\n    }\n}",
+    "bugLineIndex": 14,
+    "explanation": "这是经典的嵌套同步锁顺序死锁隐患！sendMetadata 先占 lockA 再占 lockB，而 updateBroker 先占 lockB 再占 lockA。高并发的分布式消息投递和元数据刷新同时发生时，双向死锁瞬间爆发，导致 Broker 线程全部挂起占满，Kafka 彻底熔断停滞！正解是采用一致的加锁顺序，或者使用更先进的重入锁（ReentrantLock）带超时尝试。"
+  },
+  {
+    "cardId": "find-bug-flink-e4b10fa",
+    "project": "apache/flink",
+    "commitSha": "e4b10fa",
+    "language": "java",
+    "title": "ValueState 状态内存泄露",
+    "codeSnippet": "public class CustomSessionMapper extends RichFlatMapFunction<Event, Result> {\n    private transient ValueState<UserSession> sessionState;\n\n    public void open(Configuration config) {\n        sessionState = getRuntimeContext().getState(new ValueStateDescriptor<>(\"session\", UserSession.class));\n    }\n\n    public void flatMap(Event event, Collector<Result> out) throws Exception {\n        UserSession session = sessionState.value();\n        if (event.isEnd()) {\n            out.collect(new Result(session));\n            // BUG: 忘记清理 Flink 状态，导致内存无限泄露！\n        } else {\n            session.update(event);\n            sessionState.update(session);\n        }\n    }\n}",
+    "bugLineIndex": 9,
+    "explanation": "在流式事件结束时（event.isEnd()），虽然向外发出了计算结果，但完全遗漏了 sessionState.clear() 方法。随着大促期间海量用户 Session 涌入，RocksDB 状态后端的旧状态将堆积如山，最终耗尽宿主机内存导致 Flink TaskManager OOM 闪退！"
+  }
+]

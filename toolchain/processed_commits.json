@@ -1,0 +1,17 @@
+{
+  "b194666f597e1dcb6cbb515d6d636bea29c9ffb9": {
+    "repo": "apache/flink",
+    "message": "[FLINK-39751][tests] Add `FailsOnJava25`",
+    "timestamp": "2026-05-27 11:05:50"
+  },
+  "8eef95f62d96f8d5682e313c0291b85af144812b": {
+    "repo": "apache/flink",
+    "message": "[hotfix][tests] Migrate `ClusterUncaughtExceptionHandlerITCase` to JUnit5",
+    "timestamp": "2026-05-27 11:05:50"
+  },
+  "8c029d0c27d51bf257c83068ba46af093fdd3bd6": {
+    "repo": "apache/flink",
+    "message": "[FLINK-39577][table] Reuse Calcite's `COALESCE` to apply simplifications from `RexSimplify`",
+    "timestamp": "2026-05-27 11:05:50"
+  }
+}

@@ -1,0 +1,4023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DevZen 码上修行 —— AI时代的极客生存战力修行场</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050a14">
+    <!-- Google Fonts for High-Tech feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           1. 设计系统 (Design System) & 全局样式
+           ========================================================================== */
+        :root {
+            --bg-space: #090c15;
+            --bg-card: rgba(16, 22, 38, 0.7);
+            --bg-card-hover: rgba(22, 30, 52, 0.85);
+            --border-glow: rgba(0, 242, 254, 0.15);
+            
+            --color-primary: #00f2fe;
+            --color-primary-rgb: 0, 242, 254;
+            --color-success: #4efa94;
+            --color-warning: #ffb300;
+            --color-danger: #ff0055;
+            --color-text-main: #e2e8f0;
+            --color-text-muted: #64748b;
+            
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+            
+            --glow-primary: 0 0 15px rgba(0, 242, 254, 0.4);
+            --glow-success: 0 0 15px rgba(78, 250, 148, 0.4);
+            --glow-danger: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-space);
+            color: var(--color-text-main);
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.03) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 移动端排版修正：安全区域 */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .app-container {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-text-muted);
+            border-radius: 2px;
+        }
+
+        @keyframes blueGlowPulse {
+            0% { box-shadow: 0 0 5px var(--color-primary); border-color: var(--color-primary); }
+            50% { box-shadow: 0 0 25px var(--color-primary); border-color: var(--color-primary); }
+            100% { box-shadow: 0 0 5px var(--color-primary); border-color: var(--color-primary); }
+        }
+
+        /* ==========================================================================
+           2. 基础布局结构
+           ========================================================================== */
+        .header {
+            padding: 16px 20px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(9, 12, 21, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #00f2fe, #4efa94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .logo-subtitle {
+            font-size: 0.65rem;
+            font-family: var(--font-mono);
+            color: var(--color-text-muted);
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+
+        .zen-score-badge {
+            background: rgba(78, 250, 148, 0.1);
+            border: 1px solid rgba(78, 250, 148, 0.3);
+            border-radius: 12px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--color-success);
+            box-shadow: inset 0 0 5px rgba(78, 250, 148, 0.05);
+        }
+
+        .zen-score-value {
+            font-weight: 700;
+        }
+
+        .commute-offline-badge {
+            background: rgba(0, 242, 254, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 12px;
+            padding: 4px 10px;
+            color: #00f2fe;
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.05);
+            cursor: help;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.5;
+        }
+
+        .commute-offline-badge.ready {
+            opacity: 1;
+            border-color: rgba(78, 250, 148, 0.4);
+            color: #4efa94;
+            background: rgba(78, 250, 148, 0.08);
+            box-shadow: 0 0 12px rgba(78, 250, 148, 0.15);
+        }
+
+        .commute-offline-badge .offline-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00f2fe;
+            display: inline-block;
+            transition: all 0.4s;
+        }
+
+        .commute-offline-badge.ready .offline-dot {
+            background: #4efa94;
+            box-shadow: 0 0 8px #4efa94;
+            animation: pulse-green 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.35); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .case-select {
+            background: rgba(13, 18, 33, 0.95);
+            border: 1px solid var(--color-primary);
+            color: var(--color-text-main);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-family: var(--font-sans);
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 242, 254, 0.15);
+            transition: all 0.3s;
+        }
+        .case-select:focus {
+            border-color: var(--color-success);
+            box-shadow: 0 0 8px rgba(78, 250, 148, 0.3);
+        }
+
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+            padding: 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 顶部通告条 */
+        .daily-zen {
+            background: rgba(0, 242, 254, 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #94a3b8;
+        }
+
+        /* ==========================================================================
+           3. 底部导航栏 (极佳的单手大拇指握持体验)
+           ========================================================================== */
+        .nav-bar {
+            height: 72px;
+            background: rgba(13, 18, 33, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 6px 12px;
+            z-index: 100;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            outline: none;
+        }
+
+        .nav-btn.active {
+            color: var(--color-primary);
+            text-shadow: var(--glow-primary);
+        }
+
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn.active svg {
+            transform: scale(1.15) translateY(-2px);
+        }
+
+        .nav-btn span {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Nav Tab Indicator */
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            width: 16px;
+            height: 3px;
+            background: var(--color-primary);
+            border-radius: 2px;
+            opacity: 0;
+            transform: scaleX(0.1);
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-primary);
+        }
+
+        .nav-btn.active::after {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        /* ==========================================================================
+           4. 全局 UI 挂载件 (毛玻璃卡片、进度条、仪表盘)
+           ========================================================================== */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .glass-card:active {
+            border-color: rgba(0, 242, 254, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-tag {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .tag-info {
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--color-primary);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+
+        /* ==========================================================================
+           5. 模块一：架构两难天平 (Architecture Dilemma Sandbox)
+           ========================================================================== */
+        
+        /* 动态 SVG 拓扑图 */
+        .topology-container {
+            width: 100%;
+            height: 90px;
+            background: rgba(6, 8, 16, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topology-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .topo-node {
+            fill: #161e35;
+            stroke: var(--color-primary);
+            stroke-width: 1.5;
+            transition: all 0.3s;
+            filter: drop-shadow(0 0 3px rgba(0, 242, 254, 0.3));
+        }
+
+        .topo-node.active {
+            fill: rgba(0, 242, 254, 0.2);
+            stroke: var(--color-primary);
+        }
+
+        .topo-node.warning {
+            stroke: var(--color-warning);
+            filter: drop-shadow(0 0 5px rgba(255, 179, 0, 0.5));
+        }
+
+        .topo-node.danger {
+            stroke: var(--color-danger);
+            filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.6));
+            animation: shake 0.5s infinite;
+        }
+
+        .topo-label {
+            font-family: var(--font-mono);
+            font-size: 7px;
+            fill: #94a3b8;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+
+        .topo-link {
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-dasharray: 4 4;
+        }
+
+        .topo-link.active {
+            stroke: rgba(0, 242, 254, 0.3);
+        }
+
+        .topo-link.overloaded {
+            stroke: rgba(255, 0, 85, 0.4);
+            animation: dashPulse 1s linear infinite;
+        }
+
+        @keyframes dashPulse {
+            to { stroke-dashoffset: -10; }
+        }
+
+        /* 拓扑流动粒子 */
+        .flow-particle {
+            fill: var(--color-primary);
+            filter: drop-shadow(0 0 2px var(--color-primary));
+        }
+
+        .flow-particle.danger {
+            fill: var(--color-danger);
+            filter: drop-shadow(0 0 3px var(--color-danger));
+        }
+
+        /* 架构大推演 Grid 布局 */
+        .sandbox-workspace-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+            align-items: start;
+        }
+
+        .sandbox-left-column, .sandbox-right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .sandbox-workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 核心遥测仪表盘 (Telemetry Dashboard) */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .telemetry-item {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .telemetry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .telemetry-title {
+            font-size: 0.65rem;
+            color: var(--color-text-muted);
+            font-weight: 600;
+        }
+
+        .telemetry-icon {
+            font-size: 0.75rem;
+        }
+
+        .telemetry-body {
+            margin-top: 8px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .telemetry-value {
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-text-main);
+            transition: color 0.3s;
+        }
+
+        .telemetry-unit {
+            font-size: 0.6rem;
+            color: var(--color-text-muted);
+            font-weight: bold;
+        }
+
+        .telemetry-status-bar {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .telemetry-progress {
+            height: 100%;
+            width: 0%;
+            background: var(--color-primary);
+            transition: width 0.3s, background 0.3s;
+            box-shadow: 0 0 4px var(--color-primary);
+        }
+
+        /* 预警红闪烁 */
+        .system-alert-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            border: 2px solid var(--color-danger);
+            pointer-events: none;
+            opacity: 0;
+            animation: none;
+            z-index: 1;
+        }
+
+        @keyframes redGlowPulse {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.4; }
+        }
+
+        .system-shaking {
+            animation: systemShake 0.15s infinite;
+        }
+
+        @keyframes systemShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes flowPath {
+            0% {
+                offset-distance: 0%;
+            }
+            100% {
+                offset-distance: 100%;
+            }
+        }
+
+        /* 下拉调节面板：单手滑动天平 */
+        .sliders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-value-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--color-primary);
+            background: rgba(0, 242, 254, 0.08);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 242, 254, 0.15);
+        }
+
+        /* 核心定制滑块 */
+        .glow-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .glow-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .glow-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--color-primary);
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 10px var(--color-primary);
+            transition: transform 0.1s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .glow-slider::-webkit-slider-thumb:active {
+            transform: scale(1.3);
+            box-shadow: 0 0 18px var(--color-primary);
+        }
+
+        .slider-axis-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            color: var(--color-text-muted);
+            font-weight: bold;
+            padding: 0 2px;
+        }
+
+        /* AI 架构点评视窗 */
+        .ai-review-card {
+            background: rgba(5, 7, 12, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .ai-reviewer-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--color-success);
+            font-family: var(--font-mono);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .ai-reviewer-avatar {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-success);
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(78, 250, 148, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 4px rgba(78, 250, 148, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(78, 250, 148, 0); }
+        }
+
+        .ai-review-content {
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+            min-height: 54px;
+        }
+
+        /* ==========================================================================
+           6. 模块二：混沌排障“海龟汤” (Chaos Detective)
+           ========================================================================== */
+        
+        .terminal-container {
+            background: #04060b;
+            border: 1px solid rgba(0, 242, 254, 0.15);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            padding: 14px;
+            min-height: 250px;
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+            position: relative;
+        }
+
+        .terminal-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .terminal-line {
+            font-size: 0.7rem;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .terminal-input-prompt {
+            color: var(--color-primary);
+        }
+
+        .terminal-system {
+            color: var(--color-text-muted);
+        }
+
+        .terminal-warning {
+            color: var(--color-warning);
+        }
+
+        .terminal-danger {
+            color: var(--color-danger);
+            font-weight: bold;
+        }
+
+        .terminal-success {
+            color: var(--color-success);
+        }
+
+        .terminal-highlight {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        /* 行动工具箱 (One-hand Action Toolbox) */
+        .toolbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .toolbox-btn {
+            background: rgba(16, 22, 38, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px 10px;
+            color: var(--color-text-main);
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            text-align: center;
+            outline: none;
+        }
+
+        .toolbox-btn:active:not(:disabled) {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: var(--color-primary);
+            transform: scale(0.96);
+        }
+
+        .toolbox-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .toolbox-btn-icon {
+            font-size: 1rem;
+            color: var(--color-primary);
+        }
+
+        .refresh-btn {
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: #00f2fe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.05);
+        }
+
+        .refresh-btn:hover:not(:disabled) {
+            background: rgba(0, 242, 254, 0.18);
+            border-color: #00f2fe;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .refresh-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==========================================================================
+           AI 幻境召请仪主面板及动态按钮样式
+           ========================================================================== */
+        .ai-summoner-panel {
+            background: rgba(16, 12, 38, 0.5);
+            border: 1px solid rgba(157, 78, 221, 0.25);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 0 15px rgba(123, 44, 191, 0.05), inset 0 0 15px rgba(123, 44, 191, 0.08);
+            transition: all 0.4s ease;
+        }
+
+        .ai-summoner-panel:hover {
+            border-color: rgba(199, 125, 255, 0.4);
+            box-shadow: 0 0 20px rgba(123, 44, 191, 0.1), inset 0 0 20px rgba(123, 44, 191, 0.12);
+        }
+
+        .summoner-title {
+            font-size: 0.75rem;
+            color: #c77dff;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(199, 125, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .summon-select {
+            background: rgba(13, 10, 28, 0.95);
+            border: 1px solid rgba(123, 44, 191, 0.4);
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .summon-select:hover, .summon-select:focus {
+            border-color: #c77dff;
+            box-shadow: 0 0 8px rgba(199, 125, 255, 0.25);
+        }
+
+        .summon-btn {
+            background: linear-gradient(135deg, #7b2cbf, #3c096c);
+            border: 1px solid rgba(199, 125, 255, 0.45);
+            color: #e0aaff;
+            font-family: var(--font-sans);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(123, 44, 191, 0.3);
+            outline: none;
+        }
+
+        .summon-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #9d4edd, #5a189a);
+            border-color: rgba(224, 170, 255, 0.8);
+            color: #ffffff;
+            box-shadow: 0 0 18px rgba(157, 78, 221, 0.6);
+        }
+
+        .summon-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .summon-btn:disabled {
+            background: #1a1625;
+            color: #64748b;
+            border-color: #334155;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .refresh-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .spinning .refresh-icon {
+            animation: spin 1.2s infinite linear;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .detective-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            margin-bottom: 12px;
+            font-family: var(--font-mono);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+
+        .detective-moves {
+            color: var(--color-warning);
+        }
+
+        /* 破案解密面板 */
+        .solve-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .solve-headline {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--color-warning);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .solve-option {
+            background: rgba(255, 0, 85, 0.03);
+            border: 1px solid rgba(255, 0, 85, 0.15);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: var(--color-text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            outline: none;
+        }
+
+        .solve-option:active:not(:disabled) {
+            background: rgba(255, 0, 85, 0.1);
+            border-color: var(--color-danger);
+            box-shadow: var(--glow-danger);
+        }
+
+        /* 侦探结算模块 */
+        .settlement-card {
+            text-align: center;
+            padding: 20px 16px;
+            border-radius: 12px;
+            animation: expandScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes expandScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .settlement-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .settlement-title.success {
+            color: var(--color-success);
+            text-shadow: var(--glow-success);
+        }
+
+        .settlement-title.failure {
+            color: var(--color-danger);
+            text-shadow: var(--glow-danger);
+        }
+
+        .settlement-desc {
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: var(--color-text-muted);
+            margin-bottom: 16px;
+        }
+
+        .action-primary-btn {
+            background: linear-gradient(90deg, #00f2fe, #4efa94);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #04060b;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-shadow: var(--glow-primary);
+            transition: transform 0.2s;
+            outline: none;
+        }
+
+        .action-primary-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ==========================================================================
+           7. 模块三：AI 老板对齐模拟器 (AI Alignment Simulator)
+           ========================================================================== */
+        
+        .boss-card {
+            background: rgba(11, 15, 26, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        /* 老板三维情感仪 (Emotion Dashboard) */
+        .boss-dashboard {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        .boss-avatar-wrapper {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(22, 30, 52, 0.8);
+            border: 2px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-primary);
+            overflow: hidden;
+        }
+
+        .boss-avatar-icon {
+            font-size: 1.5rem;
+        }
+
+        .boss-metrics {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .metric-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+
+        .metric-name {
+            color: var(--color-text-muted);
+            width: 40px;
+        }
+
+        .metric-glow-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            margin: 0 8px;
+            overflow: hidden;
+        }
+
+        .metric-glow-progress {
+            height: 100%;
+            width: 50%;
+            border-radius: 2px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            width: 24px;
+            text-align: right;
+        }
+
+        /* 气泡对话视窗 */
+        .boss-bubble {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .boss-bubble::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 20px;
+            width: 10px;
+            height: 10px;
+            background: #101626;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            transform: rotate(45deg);
+        }
+
+        .boss-title {
+            font-size: 0.65rem;
+            color: var(--color-primary);
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-family: var(--font-mono);
+        }
+
+        /* 职场多选对齐按钮 (Commute single-tap choices) */
+        .dialog-options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dialog-option-btn {
+            background: rgba(16, 22, 38, 0.85);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: var(--color-text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            outline: none;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .dialog-option-btn:active:not(:disabled) {
+            background: rgba(0, 242, 254, 0.05);
+            border-color: var(--color-primary);
+            transform: scale(0.98);
+        }
+
+        .dialog-option-prefix {
+            font-family: var(--font-mono);
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+
+        /* 战力结算面板 */
+        .rank-card {
+            background: rgba(16, 22, 38, 0.9);
+            border: 2px solid var(--color-primary);
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: var(--glow-primary);
+            animation: expandScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .rank-title {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .rank-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #00f2fe, #4efa94);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .rank-metric-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .rank-metric-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 8px 4px;
+        }
+
+        .rank-metric-label {
+            font-size: 0.55rem;
+            color: var(--color-text-muted);
+            margin-bottom: 4px;
+        }
+
+        .rank-metric-val {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .rank-advise {
+            font-size: 0.72rem;
+            line-height: 1.5;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 6px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+       Header
+       ========================================================================== -->
+    <header class="header">
+        <div class="logo-area">
+            <h1 class="logo-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                DEVZEN 码上修行
+            </h1>
+            <p class="logo-subtitle">Commute Dev Zen Survivor</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="commute-offline-badge" id="pwaOfflineBadge" title="极客离线通勤就绪：静态文件与大厂漏洞API已被服务工作线程全量拦截缓存！">
+                <span class="offline-dot"></span>
+                <span class="offline-text" id="pwaOfflineText">正在加载通勤包...</span>
+            </div>
+            <div class="zen-score-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+                </svg>
+                修为: <span class="zen-score-value" id="globalZenScore">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================================================
+       App Body Container
+       ========================================================================== -->
+    <main class="app-container">
+
+        <!-- ==========================================================================
+           TAB 1: 架构两难天平 (Architecture Dilemma)
+           ========================================================================== -->
+        <section class="tab-content active" id="tab-sandbox">
+            <div class="daily-zen">
+                <strong>💡 今日修行禅语：</strong>“世上没有完美的架构，只有不断权衡的代价。优秀的架构师不寻找标准答案，他们只在废墟与高可用之间寻找平衡。”
+            </div>
+
+            <!-- 网络拓扑动态模拟器 -->
+            <div class="topology-container" id="topoContainer">
+                <svg class="topology-svg" id="topoVisual">
+                    <!-- Links -->
+                    <path class="topo-link active" id="link-gt-ca" d="M 30,45 L 90,45" />
+                    <path class="topo-link active" id="link-ca-db" d="M 90,45 L 290,45" />
+                    <path class="topo-link active" id="link-gt-qu" d="M 30,45 Q 90,75 180,45" />
+                    
+                    <!-- SVG Particles -->
+                    <circle class="flow-particle" id="particle-gt-ca" r="2" />
+                    <circle class="flow-particle" id="particle-ca-db" r="2" />
+                    <circle class="flow-particle" id="particle-gt-qu" r="2" />
+
+                    <!-- Nodes -->
+                    <!-- API Gateway -->
+                    <circle class="topo-node active" id="node-gateway" cx="30" cy="45" r="14" />
+                    <text class="topo-label" x="30" y="48">网关</text>
+                    
+                    <!-- Redis Cache -->
+                    <circle class="topo-node active" id="node-cache" cx="90" cy="45" r="14" />
+                    <text class="topo-label" x="90" y="48">缓存</text>
+
+                    <!-- Kafka Queue -->
+                    <circle class="topo-node active" id="node-queue" cx="180" cy="45" r="14" />
+                    <text class="topo-label" x="180" y="48">队列</text>
+
+                    <!-- Primary DB -->
+                    <circle class="topo-node active" id="node-db" cx="290" cy="45" r="14" />
+                    <text class="topo-label" x="290" y="48">DB</text>
+                </svg>
+            </div>
+
+            <!-- 核心三维遥测大盘 -->
+            <div class="telemetry-grid">
+                <!-- Latency -->
+                <div class="telemetry-item">
+                    <div class="telemetry-header">
+                        <span class="telemetry-title" id="titleMetric1">系统延迟</span>
+                        <span class="telemetry-icon" id="latencyIcon">⚡</span>
+                    </div>
+                    <div class="telemetry-body">
+                        <span class="telemetry-value" id="valLatency">4.2</span>
+                        <span class="telemetry-unit" id="unitMetric1">ms</span>
+                    </div>
+                    <div class="telemetry-status-bar">
+                        <div class="telemetry-progress" id="progressLatency"></div>
+                    </div>
+                </div>
+
+                <!-- DB Load -->
+                <div class="telemetry-item">
+                    <div class="telemetry-header">
+                        <span class="telemetry-title" id="titleMetric2">DB 负载</span>
+                        <span class="telemetry-icon" id="loadIcon">💻</span>
+                    </div>
+                    <div class="telemetry-body">
+                        <span class="telemetry-value" id="valLoad">12</span>
+                        <span class="telemetry-unit" id="unitMetric2">%</span>
+                    </div>
+                    <div class="telemetry-status-bar">
+                        <div class="telemetry-progress" id="progressLoad"></div>
+                    </div>
+                </div>
+
+                <!-- Discrepancy Rate -->
+                <div class="telemetry-item">
+                    <div class="telemetry-header">
+                        <span class="telemetry-title" id="titleMetric3">账目差错率</span>
+                        <span class="telemetry-icon" id="errorIcon">⚖️</span>
+                    </div>
+                    <div class="telemetry-body">
+                        <span class="telemetry-value" id="valError">0.00</span>
+                        <span class="telemetry-unit" id="unitMetric3">%</span>
+                    </div>
+                    <div class="telemetry-status-bar">
+                        <div class="telemetry-progress" id="progressError"></div>
+                    </div>
+                </div>
+
+                <!-- Cost -->
+                <div class="telemetry-item">
+                    <div class="telemetry-header">
+                        <span class="telemetry-title" id="titleMetric4">运行成本</span>
+                        <span class="telemetry-icon">💸</span>
+                    </div>
+                    <div class="telemetry-body">
+                        <span class="telemetry-value" id="valCost">12.8</span>
+                        <span class="telemetry-unit" id="unitMetric4">k/mo</span>
+                    </div>
+                    <div class="telemetry-status-bar">
+                        <div class="telemetry-progress" id="progressCost"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sandbox-workspace-grid">
+                <div class="sandbox-left-column">
+                    <!-- 控制面板：单手调节天平 (Dilemma Sliders) -->
+                    <div class="glass-card" style="position: relative;">
+                <!-- 预警红框 -->
+                <div class="system-alert-overlay" id="systemAlertBox"></div>
+
+                <div class="card-header" style="justify-content: space-between; align-items: center;">
+                    <h2 class="card-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        大促结算架构抉择天平
+                    </h2>
+                    <select id="architectureScenarioSelector" class="summon-select" onchange="changeArchitectureScenario()" style="font-size: 0.72rem; padding: 2px 8px; border-color: rgba(0, 242, 254, 0.4); max-width: 170px;">
+                        <option value="flash_sale">大促秒杀结算架构抉择</option>
+                        <option value="log_stream">海量日志实时计算大盘</option>
+                        <option value="social_feed">高并发社交动态Feed流</option>
+                    </select>
+                </div>
+
+                <div class="sliders-container">
+                    <!-- Slider 1: CAP -->
+                    <div class="slider-group">
+                        <div class="slider-info">
+                            <span class="slider-name">一致性 (CP) vs 可用性 (AP)</span>
+                            <span class="slider-value-label" id="valLabelCap">一致性 50%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="50" class="glow-slider" id="sliderCap">
+                        <div class="slider-axis-labels">
+                            <span>AP (最终一致性)</span>
+                            <span>CP (强一致性)</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider 2: Cache dependency -->
+                    <div class="slider-group">
+                        <div class="slider-info">
+                            <span class="slider-name">缓存依赖度 (Redis vs DB)</span>
+                            <span class="slider-value-label" id="valLabelCache">均衡 50%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="50" class="glow-slider" id="sliderCache">
+                        <div class="slider-axis-labels">
+                            <span>仅读写DB (高压)</span>
+                            <span>全内存缓存 (雪崩风险)</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider 3: Async vs Sync -->
+                    <div class="slider-group">
+                        <div class="slider-info">
+                            <span class="slider-name">写入削峰策略 (Kafka vs Sync)</span>
+                            <span class="slider-value-label" id="valLabelAsync">均衡 50%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="50" class="glow-slider" id="sliderAsync">
+                        <div class="slider-axis-labels">
+                            <span>直接同步写DB</span>
+                            <span>Kafka削峰 (异步滞后)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 架构点评视窗 -->
+            <div class="ai-review-card">
+                <div class="ai-reviewer-header">
+                    <span class="ai-reviewer-avatar"></span>
+                    <span>AI 架构评审委员会委员 (大促前线总指挥)</span>
+                </div>
+                <div class="ai-review-content" id="aiReviewText">
+                    正在分析您的架构天平配置... 请滑动滑块来进行系统演化。
+                </div>
+            </div>
+                </div> <!-- Close left column -->
+                
+                <!-- Right Column: Live Telemetry Simulation Sandbox -->
+                <div class="sandbox-right-column">
+                    <div class="glass-card" style="position: relative; display: flex; flex-direction: column; box-sizing: border-box; width: 100%;">
+                        <div class="system-alert-overlay" id="sandboxAlertBox" style="pointer-events: none; border-radius: 8px;"></div>
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M3 3v18h18"/>
+                                    <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                                </svg>
+                                架构在线故障推演中心
+                            </h2>
+                            <span class="card-tag tag-success" id="sandboxStatusTag">🟢 正常交付</span>
+                        </div>
+                        
+                        <div style="flex: 1; height: 260px; min-height: 260px; position: relative; margin-top: 10px; width: 100%; box-sizing: border-box;">
+                            <canvas id="telemetryCanvas" style="width: 100%; height: 100%; display: block; background: rgba(5, 10, 20, 0.4); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); box-sizing: border-box;"></canvas>
+                        </div>
+                        
+                        <div class="sandbox-digital-gauges" style="display: flex; gap: 12px; margin-top: 15px; justify-content: space-between; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+                            <div style="flex: 1; min-width: 90px; padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; text-align: center; box-sizing: border-box;">
+                                <div id="liveGaugeLabelTps" style="font-size: 0.75rem; color: #a9b2c3; margin-bottom: 4px;">系统吞吐 (TPS)</div>
+                                <div id="liveGaugeTps" style="font-size: 1.15rem; font-weight: 700; color: #00f2fe; font-family: monospace;">5000 /s</div>
+                            </div>
+                            <div style="flex: 1; min-width: 90px; padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; text-align: center; box-sizing: border-box;">
+                                <div id="liveGaugeLabelLatency" style="font-size: 0.75rem; color: #a9b2c3; margin-bottom: 4px;">P99 Latency</div>
+                                <div id="liveGaugeLatency" style="font-size: 1.15rem; font-weight: 700; color: #ff0055; font-family: monospace;">45.0 ms</div>
+                            </div>
+                            <div style="flex: 1; min-width: 90px; padding: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; text-align: center; box-sizing: border-box;">
+                                <div id="liveGaugeLabelCpu" style="font-size: 0.75rem; color: #a9b2c3; margin-bottom: 4px;">DB 核心负载</div>
+                                <div id="liveGaugeCpu" style="font-size: 1.15rem; font-weight: 700; color: #ffb800; font-family: monospace;">50 %</div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Close right column -->
+            </div> <!-- Close workspace grid -->
+        </section>
+
+        <!-- ==========================================================================
+           TAB 2: 混沌排障“海龟汤” (Chaos Detective)
+           ========================================================================== -->
+        <section class="tab-content" id="tab-detective">
+            <div class="detective-stats">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>🎯</span>
+                    <select id="caseSelector" class="case-select" onchange="changeDetectiveCase()">
+                        <option value="builtin">内置案情：大促高峰商品 504 雪崩</option>
+                    </select>
+                    <button class="refresh-btn" id="btnRefreshVulns" onclick="refreshVulnerabilities()" title="同步最新的 GitHub 真实编译漏洞">
+                        <svg class="refresh-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                        同步 GitHub 最新漏洞
+                    </button>
+                </div>
+                <span class="detective-moves" id="detectiveMovesText">可用指令余量: 3</span>
+            </div>
+
+            <!-- AI 漏洞召请仪控制台 (AI Infinite Challenge Panel) -->
+            <div class="ai-summoner-panel" id="aiSummonerPanel">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span class="summoner-title">🔮 AI 虚空漏洞召请仪:</span>
+                    
+                    <select id="summonLang" class="summon-select" title="选择 AI 关卡编程语言">
+                        <option value="java">Java 语言</option>
+                        <option value="go">Go 语言 (Golang)</option>
+                        <option value="python">Python 语言</option>
+                    </select>
+                    
+                    <select id="summonCategory" class="summon-select" title="选择漏洞类别">
+                        <option value="deadlock">🔒 并发死锁/竞态</option>
+                        <option value="memory_leak">💧 内存过度泄露</option>
+                        <option value="panic_null">💥 空指针/Panic恐慌</option>
+                        <option value="resource_leak">📁 描述符/资源未关闭</option>
+                    </select>
+                </div>
+                <button class="summon-btn" id="btnSummonChallenge" onclick="summonAiChallenge()" title="发起 AI 高阶编程漏洞幻境编译">
+                    <span>🔮 降维召请 AI 关卡</span>
+                </button>
+            </div>
+
+            <!-- 极客终端 -->
+            <div class="terminal-container" id="detectiveTerminal">
+                <!-- Log Content (Will be dynamically populated) -->
+            </div>
+
+            <!-- 行动工具箱 -->
+            <div id="detectiveActionArea">
+                <div class="toolbox-grid" id="detectiveToolbox">
+                    <button class="toolbox-btn" onclick="triggerInvestigation('dump')">
+                        <span class="toolbox-btn-icon">📋</span>
+                        拉取 JVM Thread Dump
+                    </button>
+                    <button class="toolbox-btn" onclick="triggerInvestigation('gc')">
+                        <span class="toolbox-btn-icon">📈</span>
+                        分析 GC 频率与耗时
+                    </button>
+                    <button class="toolbox-btn" onclick="triggerInvestigation('net')">
+                        <span class="toolbox-btn-icon">🌐</span>
+                        检查内网交换机负载
+                    </button>
+                    <button class="toolbox-btn" onclick="triggerInvestigation('rollback')">
+                        <span class="toolbox-btn-icon">⏪</span>
+                        回滚 10分钟前上线
+                    </button>
+                </div>
+
+                <!-- 破案结论面板 (会在 3 次排查后激活) -->
+                <div class="solve-container" id="detectiveSolvePanel" style="display: none;">
+                    <h3 class="solve-headline">
+                        🚨 请立刻指明导致 504 的根本原因 (Root Cause)：
+                    </h3>
+                    <button class="solve-option" onclick="solveDetectiveCase(1)">
+                        <strong>原因 A</strong>：灰度上线包中，第三方支付 SDK 内置的 HTTP 客户端未设置 Connection Timeout，导致网络抖动时线程池被挂起占满。
+                    </button>
+                    <button class="solve-option" onclick="solveDetectiveCase(2)">
+                        <strong>原因 B</strong>：内网交换机遭遇流量攻击爆满，导致商品微服务之间通信丢包严重，网关触发 504。
+                    </button>
+                    <button class="solve-option" onclick="solveDetectiveCase(3)">
+                        <strong>原因 C</strong>：JVM 堆内存太小，大吞吐触发频繁的 Stop-the-world Full GC，导致整个网关处理停滞超时。
+                    </button>
+                </div>
+            </div>
+
+            <!-- 结算卡片 -->
+            <div class="glass-card settlement-card" id="detectiveSettlement" style="display: none;">
+                <h3 class="settlement-title" id="settlementTitle">破案成功！</h3>
+                <p class="settlement-desc" id="settlementDesc">
+                    恭喜你，准确找出了最隐蔽的代码硬伤！在 AI 时代，秒级线上定位并洞察多系统联动异常是架构师的绝对护城河。修为值增加。
+                </p>
+                <button class="action-primary-btn" onclick="resetDetectiveCase()">再次发起排障</button>
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+           TAB 3: AI 老板对齐模拟器 (AI Alignment Simulator)
+           ========================================================================== -->
+        <section class="tab-content" id="tab-simulator">
+            <div class="detective-stats" style="margin-bottom: 12px; border-bottom: none; padding-bottom: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>👔</span>
+                    <select id="scenarioSelector" class="case-select" onchange="changeScenario()">
+                        <option value="flash_sale">场景一：业务大促交付 vs 核心高并发重构</option>
+                        <option value="tech_debt">场景二：技术债偿还 vs 业务高增长对齐</option>
+                        <option value="microservices">场景三：微服务盲目拆分 vs 研发组织架构撕扯</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>💬 模式:</span>
+                    <select id="alignmentModeSelector" class="case-select" onchange="changeAlignmentMode()">
+                        <option value="script">📋 经典剧本模式</option>
+                        <option value="generative">🤖 生成式 AI 实时汇报</option>
+                    </select>
+                </div>
+            </div>
+            <!-- 模拟器卡片 -->
+            <div class="boss-card" id="simulatorPlayground">
+                <!-- 老板三维情感指标 -->
+                <div class="boss-dashboard">
+                    <div class="boss-avatar-wrapper" id="bossAvatar">
+                        <span class="boss-avatar-icon">👨‍💼</span>
+                    </div>
+                    <div class="boss-metrics">
+                        <!-- Aggression -->
+                        <div class="metric-group">
+                            <span class="metric-name">暴躁度</span>
+                            <div class="metric-glow-bar">
+                                <div class="metric-glow-progress" id="bossAggressionBar" style="background-color: var(--color-warning);"></div>
+                            </div>
+                            <span class="metric-value" id="bossAggressionVal">50</span>
+                        </div>
+                        <!-- Satisfaction -->
+                        <div class="metric-group">
+                            <span class="metric-name">满意度</span>
+                            <div class="metric-glow-bar">
+                                <div class="metric-glow-progress" id="bossSatisfactionBar" style="background-color: var(--color-success);"></div>
+                            </div>
+                            <span class="metric-value" id="bossSatisfactionVal">50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 气泡对话框 -->
+                <div class="boss-bubble">
+                    <div class="boss-title" id="bossSpeakerName">李总 (业务线总经理 / 狂热的 KPI 捍卫者)</div>
+                    <div id="bossSpeechText">
+                        小张，听前线说你要搞什么“大促核心链路异步削峰重构”？离大促就剩一周了！你不仅要改核心下单接口，还要引入什么 Kafka 消息队列，万一发丢了订单谁负责？直接多批点服务器硬扛不行吗，你们技术就喜欢把简单问题搞复杂！
+                    </div>
+                </div>
+            </div>
+
+            <!-- 职场抉择对话按钮 -->
+            <div class="dialog-options-container" id="simulatorChoices">
+                <!-- Option buttons will be dynamically rendered here -->
+            </div>
+
+            <!-- 生成式 AI 汇报输入框 (仅在 generative 模式下显示) -->
+            <div class="dialog-options-container" id="generativeChoices" style="display: none; flex-direction: column; gap: 12px; width: 100%;">
+                <textarea id="bossReportInput" class="terminal-command-input" style="width: 100%; min-height: 80px; padding: 12px; background: rgba(10, 15, 30, 0.85); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.95rem; resize: vertical; box-sizing: border-box;" placeholder="在此输入您的汇报方案与话术（例如：李总，关于重构，我们承诺在线上部署自动化比对网关并引入金丝雀平滑双写路由，绝对保障高可用，并能在下季度省下15%云服务开销...）"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+                    <span style="font-size: 0.85rem; color: #a9b2c3;" id="generativeRoundIndicator">本场景第 1/3 轮汇报</span>
+                    <button class="action-primary-btn" style="padding: 10px 24px; font-weight: 600;" onclick="submitGenerativeReport()" id="btnSubmitReport">向李总汇报</button>
+                </div>
+            </div>
+
+            <!-- 职场生存报告卡片 -->
+            <div class="rank-card" id="simulatorResult" style="display: none;">
+                <div class="rank-title">职场生存段位评定</div>
+                <div class="rank-name" id="rankName">P8- 救火大队长</div>
+                
+                <div class="rank-metric-summary">
+                    <div class="rank-metric-box">
+                        <div class="rank-metric-label">技术品味</div>
+                        <div class="rank-metric-val" id="scoreTech">B+</div>
+                    </div>
+                    <div class="rank-metric-box">
+                        <div class="rank-metric-label">商业理解</div>
+                        <div class="rank-metric-val" id="scoreBusiness">A</div>
+                    </div>
+                    <div class="rank-metric-box">
+                        <div class="rank-metric-label">职场情商</div>
+                        <div class="rank-metric-val" id="scoreEQ">A-</div>
+                    </div>
+                </div>
+
+                <p class="rank-advise" id="rankAdvise">
+                    你的表现证明你不仅是一个优秀的工程师，更是一个能够向上对齐的商业战友。你没有死板地堆砌分布式事务，而是用老板听得懂的“转化率”和“流量洪峰损失账”成功化解了技术与业务的对峙。
+                </p>
+
+                <button class="action-primary-btn" onclick="resetSimulatorGame()">重新博弈对齐</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==========================================================================
+       底部单手微操导航栏
+       ========================================================================== -->
+    <nav class="nav-bar">
+        <button class="nav-btn active" onclick="switchTab('sandbox')" id="btn-tab-sandbox">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span>架构天平</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('detective')" id="btn-tab-detective">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            <span>故障侦探</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('simulator')" id="btn-tab-simulator">
+            <svg viewBox="0 0 24 24">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            <span>对齐老板</span>
+        </button>
+    </nav>
+
+    <!-- ==========================================================================
+       8. JS 逻辑控制中心 (Core Logic Engine)
+       ========================================================================== -->
+    <script>
+        // ==========================================================================
+        // 8.1 基于 Web Audio API 的 UI 交互微震动及合成音效引擎 (Tactile Sound Synth)
+        // ==========================================================================
+        const AudioSynth = {
+            ctx: null,
+            
+            init() {
+                if (this.ctx) return;
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log("Web Audio API not supported", e);
+                }
+            },
+
+            // 极简触控微滴答 (Tactile Tick)
+            playTick(freq = 1200, duration = 0.015, volume = 0.05) {
+                this.init();
+                if (!this.ctx) return;
+                
+                // 恢复上下文（防止移动端手势前拦截）
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+
+            // 系统过载双警报音 (Double Alarm)
+            playWarningAlarm() {
+                this.init();
+                if (!this.ctx) return;
+                
+                const now = this.ctx.currentTime;
+                const playBeep = (timeOffset) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now + timeOffset);
+                    osc.frequency.linearRampToValueAtTime(600, now + timeOffset + 0.12);
+                    
+                    gain.gain.setValueAtTime(0.06, now + timeOffset);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + timeOffset + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + timeOffset);
+                    osc.stop(now + timeOffset + 0.15);
+                };
+                
+                playBeep(0);
+                playBeep(0.2);
+            },
+
+            // 闯关成功大三和弦 (Major Triad Ascent)
+            playSuccessChime() {
+                this.init();
+                if (!this.ctx) return;
+                
+                const now = this.ctx.currentTime;
+                const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    
+                    gain.gain.setValueAtTime(0.08, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 0.4);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.4);
+                });
+            },
+
+            // 失败下行音效 (Sad Descending Sweep)
+            playFailureDoom() {
+                this.init();
+                if (!this.ctx) return;
+                
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.6);
+                
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(now + 0.6);
+            }
+        };
+
+        // ==========================================================================
+        // 8.2 全局修为状态与导航切换
+        // ==========================================================================
+        let globalZenScore = 0;
+        const scoreElement = document.getElementById("globalZenScore");
+
+        function addZenScore(val) {
+            globalZenScore += val;
+            if (globalZenScore < 0) globalZenScore = 0;
+            scoreElement.innerText = globalZenScore;
+            // 粒子浮空及微弱缩放动画
+            scoreElement.style.transform = "scale(1.25)";
+            scoreElement.style.color = "var(--color-primary)";
+            setTimeout(() => {
+                scoreElement.style.transform = "scale(1)";
+                scoreElement.style.color = "var(--color-success)";
+            }, 300);
+        }
+
+        function switchTab(tabId) {
+            AudioSynth.playTick(1000, 0.01, 0.03);
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`btn-tab-${tabId}`).classList.add('active');
+
+            // 动态特殊初始化
+            if (tabId === 'detective' && detectiveState.isFresh) {
+                initDetectiveTerminal();
+            }
+        }
+
+        // ==========================================================================
+        // 8.3 模块一：架构两难天平沙盘物理计算引擎与 AI 评审状态机
+        // ==========================================================================
+        const sliderCap = document.getElementById("sliderCap");
+        const sliderCache = document.getElementById("sliderCache");
+        const sliderAsync = document.getElementById("sliderAsync");
+
+        const valLabelCap = document.getElementById("valLabelCap");
+        const valLabelCache = document.getElementById("valLabelCache");
+        const valLabelAsync = document.getElementById("valLabelAsync");
+
+        const valLatency = document.getElementById("valLatency");
+        const valLoad = document.getElementById("valLoad");
+        const valError = document.getElementById("valError");
+        const valCost = document.getElementById("valCost");
+
+        const progressLatency = document.getElementById("progressLatency");
+        const progressLoad = document.getElementById("progressLoad");
+        const progressError = document.getElementById("progressError");
+        const progressCost = document.getElementById("progressCost");
+
+        const aiReviewText = document.getElementById("aiReviewText");
+        const systemAlertBox = document.getElementById("systemAlertBox");
+        const sandBoxCard = document.querySelector("#tab-sandbox .glass-card");
+
+        // Telemetry Canvas & Simulation variables
+        const telemetryCanvas = document.getElementById("telemetryCanvas");
+        const simTargets = { tps: 5000, latency: 4.2, cpu: 12.0 };
+        const simCurrent = { tps: 5000, latency: 4.2, cpu: 12.0 };
+        const telemetryHistory = [];
+        const maxHistoryPoints = 120;
+
+        // SVG Node Elements for style pulsing
+        const nodeGateway = document.getElementById("node-gateway");
+        const nodeCache = document.getElementById("node-cache");
+        const nodeQueue = document.getElementById("node-queue");
+        const nodeDB = document.getElementById("node-db");
+
+        // Links
+        const linkGtCa = document.getElementById("link-gt-ca");
+        const linkCaDb = document.getElementById("link-ca-db");
+        const linkGtQu = document.getElementById("link-gt-qu");
+
+        // SVGA Particles
+        const partGtCa = document.getElementById("particle-gt-ca");
+        const partCaDb = document.getElementById("particle-ca-db");
+        const partGtQu = document.getElementById("particle-gt-qu");
+
+        let topoAnimationId = null;
+        let lastAlarmTriggerTime = 0;
+
+        // 流体动画计算
+        function updateSVGAnimation(latency, load, errorRate, isAsyncQueue) {
+            let speedFactor = Math.max(0.5, 4 - (latency / 80)); // 延迟越低流动越快
+            
+            // 为流路径挂载 CSS 路径动画
+            partGtCa.style.offsetPath = "path('M 30,45 L 90,45')";
+            partGtCa.style.animation = `flowPath ${speedFactor}s linear infinite`;
+
+            // 如果高度依赖缓存
+            if (sliderCache.value > 30) {
+                nodeCache.setAttribute("class", "topo-node active");
+                linkGtCa.setAttribute("class", "topo-link active");
+                partGtCa.style.display = "block";
+            } else {
+                nodeCache.setAttribute("class", "topo-node");
+                linkGtCa.setAttribute("class", "topo-link");
+                partGtCa.style.display = "none";
+            }
+
+            // DB 负载状态决定 DB 节点渲染
+            if (load > 85) {
+                nodeDB.setAttribute("class", "topo-node danger");
+                linkCaDb.setAttribute("class", "topo-link overloaded");
+                partCaDb.setAttribute("class", "flow-particle danger");
+            } else if (load > 55) {
+                nodeDB.setAttribute("class", "topo-node warning");
+                linkCaDb.setAttribute("class", "topo-link active");
+                partCaDb.setAttribute("class", "flow-particle");
+            } else {
+                nodeDB.setAttribute("class", "topo-node active");
+                linkCaDb.setAttribute("class", "topo-link active");
+                partCaDb.setAttribute("class", "flow-particle");
+            }
+            
+            partCaDb.style.offsetPath = "path('M 90,45 L 290,45')";
+            partCaDb.style.animation = `flowPath ${speedFactor * 1.5}s linear infinite`;
+
+            // 是否启动异步队列
+            if (isAsyncQueue > 15) {
+                nodeQueue.setAttribute("class", "topo-node active");
+                linkGtQu.setAttribute("class", "topo-link active");
+                partGtQu.style.display = "block";
+                partGtQu.style.offsetPath = "path('M 30,45 Q 90,75 180,45')";
+                partGtQu.style.animation = `flowPath ${speedFactor * 1.2}s linear infinite`;
+            } else {
+                nodeQueue.setAttribute("class", "topo-node");
+                linkGtQu.setAttribute("class", "topo-link");
+                partGtQu.style.display = "none";
+            }
+        }
+
+        // ==========================================================================
+        // 8.35 架构天平多场景演化数据库与自适应计算引擎
+        // ==========================================================================
+        const activeScenario = {
+            current: "flash_sale" // 默认大促秒杀结算场景
+        };
+
+        const architectureScenarios = {
+            flash_sale: {
+                title: "大促秒杀结算架构抉择",
+                reviewerTitle: "AI 架构评审委员会委员 (大促前线总指挥)",
+                sliders: {
+                    cap: {
+                        name: "一致性 (CP) vs 可用性 (AP)",
+                        left: "AP (最终一致性)",
+                        right: "CP (强一致性)",
+                        valFunc: (v) => v < 35 ? `强可用 (AP) ${100-v}%` : (v > 65 ? `强一致 (CP) ${v}%` : `均衡中庸 ${v}%`)
+                    },
+                    cache: {
+                        name: "缓存依赖度 (Redis vs DB)",
+                        left: "仅读写DB (高压)",
+                        right: "全内存缓存 (雪崩风险)",
+                        valFunc: (v) => v < 30 ? `直接写入DB ${100-v}%` : (v > 70 ? `极度缓存依赖 ${v}%` : `合理分流 ${v}%`)
+                    },
+                    async: {
+                        name: "写入削峰策略 (Kafka vs Sync)",
+                        left: "直接同步写DB",
+                        right: "Kafka削峰 (异步滞后)",
+                        valFunc: (v) => v < 30 ? `直写DB事务 ${100-v}%` : (v > 70 ? `重度队列异步 ${v}%` : `部分缓冲 ${v}%`)
+                    }
+                },
+                metrics: {
+                    m1: { title: "系统延迟", unit: "ms", max: 150 },
+                    m2: { title: "DB 负载", unit: "%", max: 100 },
+                    m3: { title: "账目差错率", unit: "%", max: 15 },
+                    m4: { title: "运行成本", unit: "k/mo", max: 50 }
+                },
+                legends: {
+                    l1: "■ DB 核心负载 (%)",
+                    l2: "■ 系统吞吐 (TPS)",
+                    l3: "■ P99 延迟 (ms)",
+                    gaugeTps: "系统吞吐 (TPS)",
+                    gaugeLatency: "P99 Latency",
+                    gaugeCpu: "DB 核心负载"
+                },
+                calculate: (cap, cache, async) => {
+                    let baseLatency = 4.0;
+                    let capPenalty = Math.pow(cap / 35, 2.5);
+                    let dbLoadFactor = (100 - cache) * 0.4;
+                    let asyncBonus = (100 - async) * 0.15;
+                    let finalLatency = baseLatency + capPenalty * 0.8 + dbLoadFactor * 0.3 + asyncBonus * 1.2;
+                    if (cache > 85 && async > 75) {
+                        finalLatency = 1.2 + (cap * 0.05);
+                    }
+
+                    let baseLoad = 10;
+                    let noCacheLoad = Math.pow((100 - cache) / 10, 2);
+                    let syncWriteLoad = Math.pow((100 - async) / 10, 1.8);
+                    let finalLoad = Math.min(99.5, baseLoad + noCacheLoad * 0.85 + syncWriteLoad * 0.25);
+
+                    let finalError = 0.0;
+                    if (cap < 50 || async > 40) {
+                        let apFactor = (50 - cap) * 0.15;
+                        let asyncLagFactor = (async - 40) * 0.08;
+                        finalError = Math.max(0, apFactor + asyncLagFactor);
+                    }
+                    if (cap >= 70 && async < 30) {
+                        finalError = 0.0;
+                    }
+
+                    let finalCost = 8.5 + (cache * 0.05) + (async * 0.04) + (cap * 0.03);
+                    if (finalLoad > 80) {
+                        finalCost += (finalLoad - 80) * 0.6;
+                    }
+
+                    let baseTps = 8000;
+                    let tpsPenalty = 0;
+                    if (finalLoad > 85) {
+                        tpsPenalty = (finalLoad - 85) / 15;
+                    }
+                    let finalTps = Math.max(200, Math.round(baseTps * (1.0 - Math.pow(tpsPenalty, 1.8))));
+
+                    let rating = "";
+                    let feedback = "";
+                    if (finalLoad > 88 || finalLatency > 120 || finalError > 6.0) {
+                        rating = "💥 状态：灾难边缘 (System Implosion Risk)";
+                        feedback = "警告：系统处于高负载极危警戒态！当前架构配比在大促秒杀极高并发下瞬间触发 Full GC 或高延迟超时，导致服务大量不可用。建议关闭同步串行链路，立即平滑升级缓存与异步分流阻断！";
+                    } else {
+                        if (async > 70) {
+                            rating = "🛡️ 状态：卓越异步削峰架构 (Highly Resilient)";
+                            feedback = "恭喜！您采用了**「异步削峰旁路路由」**：在大促秒杀流量涌入时，利用 Kafka 消息队列将核心写操作无缝收归队列异步处理，并使用一键降级降压开关，成功为后端数据库提供了高强度隔震防护！";
+                        } else if (cap < 30) {
+                            rating = "⚡ 状态：极速极简极致性能 (Performance Optimized)";
+                            feedback = "性能表现极其优秀！您将系统一致性妥协给可用性，利用 AP 机制配合 Redis 旁路大颗粒热缓本地读取，将系统整体响应延时压缩至 10ms 以内！但请注意在大促后期对部分脏数据进行对账追平。";
+                        } else {
+                            rating = "⚖️ 状态：中规中矩业务架构 (Standard Balanced)";
+                            feedback = "当前架构处于极度均衡状态。读写比和强一致性得到了不错的满足，但在遭遇十万级高并发秒杀瞬时洪峰时，数据库可能会由于悲观锁占满连接池。建议适当引入二级分布式缓存或队列削峰以防抖动。";
+                        }
+                    }
+
+                    return {
+                        m1: finalLatency,
+                        m2: finalLoad,
+                        m3: finalError,
+                        m4: finalCost,
+                        g1: finalTps,
+                        g2: finalLatency,
+                        g3: finalLoad,
+                        rating: rating,
+                        feedback: feedback,
+                        isDanger: finalLoad > 88 || finalLatency > 120 || finalError > 6.0
+                    };
+                }
+            },
+            log_stream: {
+                title: "海量日志实时计算大盘抉择",
+                reviewerTitle: "AI 数据管道首席科学家 (实时流计算专家)",
+                sliders: {
+                    cap: {
+                        name: "数据粒度偏好 (Raw vs Aggregated)",
+                        left: "原始明细日志 (大IO)",
+                        right: "聚合维度指标 (轻量化)",
+                        valFunc: (v) => v < 35 ? `明细保留度 ${100-v}%` : (v > 65 ? `高度聚合快照 ${v}%` : `适度采样 ${v}%`)
+                    },
+                    cache: {
+                        name: "计算引擎选型 (Flink vs Spark)",
+                        left: "Flink 实时流处理",
+                        right: "Spark 周期批计算",
+                        valFunc: (v) => v < 30 ? `Flink毫秒级捕获 ${100-v}%` : (v > 70 ? `Spark周期批计算 ${v}%` : `混合 Lambda 架构 ${v}%`)
+                    },
+                    async: {
+                        name: "缓冲水位控制 (Kafka vs Direct)",
+                        left: "直连 HTTP 吞吐",
+                        right: "Kafka 百万级缓冲区",
+                        valFunc: (v) => v < 30 ? `无缓冲直写 ${100-v}%` : (v > 70 ? `重度 Kafka 缓冲 ${v}%` : `轻量缓冲调优 ${v}%`)
+                    }
+                },
+                metrics: {
+                    m1: { title: "Flink 延迟", unit: "ms", max: 800 },
+                    m2: { title: "存储占用", unit: "TB/d", max: 100 },
+                    m3: { title: "丢数据率", unit: "%", max: 10 },
+                    m4: { title: "计算成本", unit: "k/mo", max: 60 }
+                },
+                legends: {
+                    l1: "■ CPU 计算负载 (%)",
+                    l2: "■ 日志吞吐 (Log/s)",
+                    l3: "■ 管道延迟 (ms)",
+                    gaugeTps: "日志吞吐 (Log/s)",
+                    gaugeLatency: "管道延迟",
+                    gaugeCpu: "CPU 计算负载"
+                },
+                calculate: (cap, cache, async) => {
+                    // 1. Flink 延迟
+                    let baseDelay = 10.0;
+                    let sparkPenalty = Math.pow(cache / 25, 2.8);
+                    let kafkaPenalty = async * 0.8;
+                    let aggBonus = (100 - cap) * 0.1;
+                    let flinkLatency = baseDelay + sparkPenalty * 1.5 + kafkaPenalty * 0.4 + aggBonus;
+
+                    // 2. 存储占用
+                    let rawFactor = (100 - cap) * 0.9;
+                    let storageSize = Math.max(1.5, rawFactor * 0.9 + (100 - async) * 0.1);
+
+                    // 3. 丢数据率
+                    let dropRate = 0.0;
+                    if (async < 45 && cap < 40) {
+                        let pushPressure = (45 - async) * 0.15 + (40 - cap) * 0.08;
+                        dropRate = Math.max(0, pushPressure);
+                    }
+
+                    // 4. 计算成本
+                    let costBase = 12.0;
+                    let streamCost = (100 - cache) * 0.25;
+                    let detailCost = (100 - cap) * 0.18;
+                    let kafkaCost = async * 0.08;
+                    let flinkCost = costBase + streamCost + detailCost + kafkaCost;
+                    if (flinkLatency > 400) {
+                        flinkCost -= (flinkLatency - 400) * 0.03;
+                    }
+
+                    let baseLogTps = 25000;
+                    let tpsFactor = (100 - cap) * 0.8 + 20;
+                    let finalLogTps = Math.round(baseLogTps * (tpsFactor / 100));
+                    if (dropRate > 5.0) {
+                        finalLogTps = Math.round(finalLogTps * (1.0 - (dropRate - 5.0) * 0.06));
+                    }
+
+                    let cpuLoad = Math.min(99.5, 15 + (100 - cache) * 0.4 + (100 - cap) * 0.35 + (async * 0.1));
+
+                    let rating = "";
+                    let feedback = "";
+                    if (dropRate > 4.5 || flinkLatency > 650) {
+                        rating = "💥 状态：管道严重堵塞 (Pipeline Congested)";
+                        feedback = "警告：当前数据管道发生不可逆拥堵！直写HTTP在海量明细日志下将应用套接字瞬间打满，导致高频丢数据与数据逃逸。建议立刻提升 Kafka 缓冲区水位，或将引擎迁移至批处理/采样聚合以降低系统整体负荷。";
+                    } else {
+                        if (cache < 35 && async > 60) {
+                            rating = "🛡️ 状态：超强实时流计算网格 (Flink Real-time Streaming)";
+                            feedback = "恭喜！您架构了经典的**「Lambda 实时高防数仓」**：通过 Kafka 百万级缓冲区对突发日志波峰实施软着陆，完美驱动 Flink 毫秒级流式算子进行实时风控。管道数据几乎零遗漏，时效性极强！";
+                        } else if (cache > 70) {
+                            rating = "💸 状态：低能耗海量批处理 (Cost-Optimized Batch)";
+                            feedback = "方案十分经济！您利用 Spark 进行定期微批拉取，并将原始数据直接高度聚合存储，极大削减了服务器集群运行开销与每日存储话单开销。虽然数据延迟较大，但在离线分析场景下极具性价比！";
+                        } else {
+                            rating = "⚖️ 状态：均衡型数据管道 (Standard Streaming)";
+                            feedback = "数据通道配比相对稳健。但在遭遇突发系统故障引发的海量 Trace 日志喷涌时，由于缓冲区配比偏紧，Flink 可能会由于背压引发大面积延时。建议适度调大 Kafka 动态窗口。";
+                        }
+                    }
+
+                    return {
+                        m1: flinkLatency,
+                        m2: storageSize,
+                        m3: dropRate,
+                        m4: flinkCost,
+                        g1: finalLogTps,
+                        g2: flinkLatency,
+                        g3: cpuLoad,
+                        rating: rating,
+                        feedback: feedback,
+                        isDanger: dropRate > 4.5 || flinkLatency > 650
+                    };
+                }
+            },
+            social_feed: {
+                title: "高并发社交动态Feed流架构抉择",
+                reviewerTitle: "AI 社交网络系统内核主管 (高并发 Feed 架构师)",
+                sliders: {
+                    cap: {
+                        name: "分发推拉策略 (Push vs Pull)",
+                        left: "写扩散 Push (发贴重)",
+                        right: "读扩散 Pull (拉取重)",
+                        valFunc: (v) => v < 35 ? `极致写扩散(Push) ${100-v}%` : (v > 65 ? `极致读扩散(Pull) ${v}%` : `推拉结合架构 ${v}%`)
+                    },
+                    cache: {
+                        name: "存储介质倾向 (HBase vs Redis)",
+                        left: "HBase 宽表持久化",
+                        right: "Redis 极速热存",
+                        valFunc: (v) => v < 30 ? `偏向 HBase 宽表 ${100-v}%` : (v > 70 ? `偏向 Redis 内存 ${v}%` : `多级冷热分流 ${v}%`)
+                    },
+                    async: {
+                        name: "冷热数据分流 (Strict vs Mixed)",
+                        left: "冷热物理离散分流",
+                        right: "全量数据内存缓存",
+                        valFunc: (v) => v < 30 ? `严格冷热离散 ${100-v}%` : (v > 70 ? `全量驻留内存 ${v}%` : `按时间滑动淘汰 ${v}%`)
+                    }
+                },
+                metrics: {
+                    m1: { title: "Feed 首屏延时", unit: "ms", max: 500 },
+                    m2: { title: "写放大系数", unit: "x", max: 80 },
+                    m3: { title: "内存资源占用", unit: "GB", max: 512 },
+                    m4: { title: "部署成本", unit: "k/mo", max: 80 }
+                },
+                legends: {
+                    l1: "■ Redis 内存负载 (%)",
+                    l2: "■ 用户请求 TPS",
+                    l3: "■ 首屏加载时间 (ms)",
+                    gaugeTps: "用户请求 TPS",
+                    gaugeLatency: "首屏加载时间",
+                    gaugeCpu: "Redis 内存负载"
+                },
+                calculate: (cap, cache, async) => {
+                    let baseDelay = 8.0;
+                    let pullLatency = Math.pow(cap / 20, 2.2);
+                    let hbasePenalty = (100 - cache) * 1.8;
+                    let coldPenalty = (100 - async) * 0.4;
+                    let feedLatency = baseDelay + pullLatency * 0.8 + hbasePenalty * 0.6 + coldPenalty * 0.5;
+                    if (cap < 30 && cache > 70) {
+                        feedLatency = 2.5 + (async * 0.05);
+                    }
+
+                    let writeAmp = 1.0;
+                    if (cap < 70) {
+                        writeAmp = 1.0 + Math.pow((70 - cap) / 8, 1.8);
+                    }
+
+                    let baseMem = 16.0;
+                    let redisFactor = cache * 2.8;
+                    let allInMemoryFactor = async * 1.8;
+                    let memorySize = baseMem + redisFactor + allInMemoryFactor;
+
+                    let feedCost = 10.0 + (memorySize * 0.12) + (writeAmp * 0.2);
+
+                    let baseUserTps = 12000;
+                    let tpsFactor = (100 - feedLatency / 500 * 100);
+                    let finalUserTps = Math.max(100, Math.round(baseUserTps * Math.max(0.05, tpsFactor / 100)));
+
+                    let redisMemLoad = Math.min(99.5, 5.0 + (cache * 0.6) + (async * 0.35));
+
+                    let rating = "";
+                    let feedback = "";
+                    if (writeAmp > 55.0 || memorySize > 450.0) {
+                        rating = "💥 状态：系统成本爆棚 / 写雪崩 (System Collapse Risk)";
+                        feedback = "警告：当前 Feed 流架构面临崩溃！极致写扩散在明星用户发博时触发万倍写放大，瞬间瘫痪消息队列；同时全量内存缓存使得部署规格突破 400GB，月度成本开销不堪重负。必须立即向读扩散（Pull）转移或开启冷热分流！";
+                    } else {
+                        if (cap >= 65 && cache > 60 && async < 40) {
+                            rating = "🛡️ 状态：高内聚读扩散分流架构 (Pull Optimized)";
+                            feedback = "恭喜！您采用了**「多级冷热离散读扩散」**方案：利用读扩散彻底将写放大削减为 1.0，保护了大V发微博时的核心网关；同时使用严格的冷热物理离散隔离，将近期活跃 Feed 缓存在内存，历史博文归档在 HBase 宽表，完美平衡了首屏体验与基础设施开销！";
+                        } else if (cap < 30 && cache > 80) {
+                            rating = "⚡ 状态：极致秒级渲染写扩散 (Extreme Read-Speed)";
+                            feedback = "读性能极其彪悍！在写扩散机制下，普通用户的 Inbox 已被完全预计算，拉取 Feed 流仅需一次 Redis 内存读取，响应时延处于毫秒级巅峰！但请密切监控社交大V（大粉）发微博时的削峰积压，防止写雪崩。";
+                        } else {
+                            rating = "⚖️ 状态：均衡社交 Feed 方案 (Balanced Feed System)";
+                            feedback = "Feed 流分发中规中矩。读写策略与内存占比相对稳健，但在遇到突发大V流量冲刷或长期不活跃用户突然拉取时，容易因为宽表只读吞吐不足引发拖底超时。建议适度优化推拉结合混合算法。";
+                        }
+                    }
+
+                    return {
+                        m1: feedLatency,
+                        m2: writeAmp,
+                        m3: memorySize,
+                        m4: feedCost,
+                        g1: finalUserTps,
+                        g2: feedLatency,
+                        g3: redisMemLoad,
+                        rating: rating,
+                        feedback: feedback,
+                        isDanger: writeAmp > 55.0 || memorySize > 450.0
+                    };
+                }
+            }
+        };
+
+        function changeArchitectureScenario() {
+            const selector = document.getElementById("architectureScenarioSelector");
+            if (!selector) return;
+            
+            const prevScenario = activeScenario.current;
+            activeScenario.current = selector.value;
+            
+            // 播放切换声效
+            AudioSynth.playTick(1200, 0.08, 0.05);
+            
+            const sc = architectureScenarios[activeScenario.current];
+            
+            // 1. 更新大天平卡片标题与评审专家人设
+            const cardTitleNode = document.querySelector("#tab-sandbox .glass-card h2.card-title");
+            if (cardTitleNode) {
+                cardTitleNode.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    ${sc.title}
+                `;
+            }
+            
+            const aiReviewerHeader = document.querySelector("#tab-sandbox .ai-reviewer-header span:last-child");
+            if (aiReviewerHeader) {
+                aiReviewerHeader.innerText = sc.reviewerTitle;
+            }
+            
+            // 2. 更新滑块文本定义与轴描述标签
+            const sliderGroups = document.querySelectorAll("#tab-sandbox .sliders-container .slider-group");
+            if (sliderGroups.length === 3) {
+                // 滑块 1
+                sliderGroups[0].querySelector(".slider-name").innerText = sc.sliders.cap.name;
+                const axisLabels1 = sliderGroups[0].querySelectorAll(".slider-axis-labels span");
+                if (axisLabels1.length === 2) {
+                    axisLabels1[0].innerText = sc.sliders.cap.left;
+                    axisLabels1[1].innerText = sc.sliders.cap.right;
+                }
+                
+                // 滑块 2
+                sliderGroups[1].querySelector(".slider-name").innerText = sc.sliders.cache.name;
+                const axisLabels2 = sliderGroups[1].querySelectorAll(".slider-axis-labels span");
+                if (axisLabels2.length === 2) {
+                    axisLabels2[0].innerText = sc.sliders.cache.left;
+                    axisLabels2[1].innerText = sc.sliders.cache.right;
+                }
+                
+                // 滑块 3
+                sliderGroups[2].querySelector(".slider-name").innerText = sc.sliders.async.name;
+                const axisLabels3 = sliderGroups[2].querySelectorAll(".slider-axis-labels span");
+                if (axisLabels3.length === 2) {
+                    axisLabels3[0].innerText = sc.sliders.async.left;
+                    axisLabels3[1].innerText = sc.sliders.async.right;
+                }
+            }
+            
+            // 3. 更新核心三维遥测指标卡牌的标题与单位文字
+            document.getElementById("titleMetric1").innerText = sc.metrics.m1.title;
+            document.getElementById("unitMetric1").innerText = sc.metrics.m1.unit;
+            
+            document.getElementById("titleMetric2").innerText = sc.metrics.m2.title;
+            document.getElementById("unitMetric2").innerText = sc.metrics.m2.unit;
+            
+            document.getElementById("titleMetric3").innerText = sc.metrics.m3.title;
+            document.getElementById("unitMetric3").innerText = sc.metrics.m3.unit;
+            
+            document.getElementById("titleMetric4").innerText = sc.metrics.m4.title;
+            document.getElementById("unitMetric4").innerText = sc.metrics.m4.unit;
+            
+            // 4. 更新右侧图表与数字化面板文字
+            document.getElementById("liveGaugeLabelTps").innerText = sc.legends.gaugeTps;
+            document.getElementById("liveGaugeLabelLatency").innerText = sc.legends.gaugeLatency;
+            document.getElementById("liveGaugeLabelCpu").innerText = sc.legends.gaugeCpu;
+            
+            // 5. 重设滑块到默认 50，并清除折线图历史重新模拟
+            sliderCap.value = 50;
+            sliderCache.value = 50;
+            sliderAsync.value = 50;
+            telemetryHistory.length = 0;
+            
+            // 6. 拓扑图可视化调整：大促秒杀才展示 MQ，其他场景隐藏
+            const topoQueue = document.getElementById("node-queue");
+            const topoLinkGtQu = document.getElementById("link-gt-qu");
+            const topoPartGtQu = document.getElementById("particle-gt-qu");
+            
+            if (activeScenario.current === "flash_sale") {
+                if (topoQueue) topoQueue.style.display = "block";
+                if (topoLinkGtQu) topoLinkGtQu.style.display = "block";
+            } else {
+                if (topoQueue) topoQueue.style.display = "none";
+                if (topoLinkGtQu) topoLinkGtQu.style.display = "none";
+                if (topoPartGtQu) topoPartGtQu.style.display = "none";
+            }
+            
+            calculateSystemState();
+        }
+
+        // 核心沙盘自适应物理计算引擎
+        function calculateSystemState() {
+            AudioSynth.playTick(600, 0.005, 0.02);
+
+            const cap = parseFloat(sliderCap.value);     
+            const cache = parseFloat(sliderCache.value); 
+            const async = parseFloat(sliderAsync.value); 
+
+            const sc = architectureScenarios[activeScenario.current];
+
+            // 1. 同步滑块文本标签
+            valLabelCap.innerText = sc.sliders.cap.valFunc(cap);
+            valLabelCache.innerText = sc.sliders.cache.valFunc(cache);
+            valLabelAsync.innerText = sc.sliders.async.valFunc(async);
+
+            // 2. 执行场景特定数学演算
+            const res = sc.calculate(cap, cache, async);
+
+            // 3. 更新大盘数据指标 (自适应保留 1 位或 2 位小数)
+            valLatency.innerText = res.m1.toFixed(res.m1 > 9.9 ? 1 : 2);
+            valLoad.innerText = Math.round(res.m2);
+            valError.innerText = res.m3.toFixed(res.m3 > 9.9 ? 1 : 2);
+            valCost.innerText = res.m4.toFixed(1);
+
+            // 4. 进度条渲染与变色
+            updateMetricProgress(progressLatency, res.m1, sc.metrics.m1.max);
+            updateMetricProgress(progressLoad, res.m2, sc.metrics.m2.max);
+            updateMetricProgress(progressError, res.m3, sc.metrics.m3.max);
+            updateMetricProgress(progressCost, res.m4, sc.metrics.m4.max);
+
+            // 5. 更新折线图遥测目标
+            simTargets.tps = res.g1;
+            simTargets.latency = res.g2;
+            simTargets.cpu = res.g3;
+
+            // 6. 系统过载红爆判定
+            if (res.isDanger) {
+                systemAlertBox.style.opacity = "1";
+                systemAlertBox.style.animation = "redGlowPulse 0.8s infinite";
+                sandBoxCard.classList.add("system-shaking");
+                
+                // 警报声限流（至少间隔 1.5s 触发一次）
+                let nowTime = Date.now();
+                if (nowTime - lastAlarmTriggerTime > 1500) {
+                    AudioSynth.playWarningAlarm();
+                    lastAlarmTriggerTime = nowTime;
+                }
+            } else {
+                systemAlertBox.style.opacity = "0";
+                systemAlertBox.style.animation = "none";
+                sandBoxCard.classList.remove("system-shaking");
+            }
+
+            // 7. 拓扑图更新
+            updateSVGAnimation(res.m1, res.m2, res.m3, async);
+
+            // 8. AI 点评渲染
+            aiReviewText.innerHTML = `<strong>${res.rating}</strong><br><p style="margin-top: 5px; font-size: 0.9rem; line-height: 1.5; color: #a9b2c3;">${res.feedback}</p>`;
+        }
+
+        function updateMetricProgress(element, value, maxVal) {
+            let pct = Math.min(100, (value / maxVal) * 100);
+            element.style.width = `${pct}%`;
+        }
+
+        // 监听滑块拖动事件，触发实时重算
+        sliderCap.addEventListener("input", calculateSystemState);
+        sliderCache.addEventListener("input", calculateSystemState);
+        sliderAsync.addEventListener("input", calculateSystemState);
+
+        // 页面启动时进行首次初始化计算
+        calculateSystemState();
+            
+                  // ==========================================================================
+        // 8.5 模块二：混沌排障“海龟汤”终端推理引擎
+        // ==========================================================================
+        const detectiveTerminal = document.getElementById("detectiveTerminal");
+        const detectiveMovesText = document.getElementById("detectiveMovesText");
+        const detectiveToolbox = document.getElementById("detectiveToolbox");
+        const detectiveSolvePanel = document.getElementById("detectiveSolvePanel");
+        const detectiveSettlement = document.getElementById("detectiveSettlement");
+        const caseSelector = document.getElementById("caseSelector");
+
+        const detectiveState = {
+            isFresh: true,
+            movesLeft: 3,
+            history: [],
+            investigations: new Set(),
+            currentCase: "builtin",
+            casesDatabase: {} // 加载的外部漏洞库
+        };
+
+        const builtinCase = {
+            cardId: "builtin",
+            title: "大促高峰商品 504 雪崩",
+            symptom: "[PANIC] 下游 Flink 流处理背压呈现黄色警报，数据库并发锁持有正常。JVM GC 频率发生不可逆飙升，目前处于未知挂起态...",
+            toolbox: {
+                dump: "[SUCCESS] JVM Thread Dump 完成。核心分析发现如下线程饥饿：\n- \"http-nio-8080-exec-41\" state: WAITING on java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject@4bf2e8\n- 共有 198 个服务连接线程全部卡死在「org.apache.http.impl.conn.PoolingHttpClientConnectionManager.leaseConnection」！这说明连接池租约全部耗尽，没有任何新连接可释放！",
+                gc: "[SUCCESS] GC Metrics: S0=0.00 S1=0.00 E=100.00 O=92.14 CCS=87.2 FGC=128 GCT=482.1\n- 诊断结论：老年代占比 (Old Gen) 高达 92% 频繁触发 Full GC。但仔细比对，每次 Full GC 后老年代内存并没有出现雪崩式回收（回收仅 2%）。这代表这不是传统的堆过小，而是发生了死锁式等待！由于每个线程都在挂起等待 HTTP Socket 返回，它们所引用的连接资源无法被回收！",
+                net: "[SUCCESS] 网卡流量遥测：rxpck/s = 85,200 | txpck/s = 91,400 | drop/s = 0.00\n- 诊断结论：内网交换机以及商品服务的网卡吞吐完全健康，零丢包、零硬件拥堵。504 并非由于内网传输故障导致。",
+                rollback: "[DANGER] 上一次灰度上线包日志：\n- commit d5c89a2: 「feat: 接入第三方支付清算通道 SDK 3.0，升级商户状态批量上报」\n- 注意：由于业务方强烈要求立刻上线此统计，灰度没有走完整的混沌演练。试图强制执行回滚操作...\n[ROLLBACK ERROR] 运维网关响应: 由于当前大促主事务已开启，系统降级规则禁止在大促秒杀期间动态重启核心支付集群节点！此路不通，你必须给出核心根因！"
+            },
+            options: [
+                { id: 1, text: "原因 A：灰度上线包中，第三方支付 SDK 内置的 HTTP 客户端未设置 Connection Timeout，导致网络抖动时线程池被挂起占满。", isCorrect: true },
+                { id: 2, text: "原因 B：内网交换机遭遇流量攻击爆满，导致商品微服务之间通信丢包严重，网关触发 504。", isCorrect: false },
+                { id: 3, text: "原因 C：JVM 堆内存太小，大吞吐触发频繁的 Stop-the-world Full GC，导致整个网关处理停滞超时。", isCorrect: false }
+            ],
+            explanation: "在最新的灰度包中，由于第三方 SDK 的 HttpClient **未设置 Connection Timeout**，导致在网络瞬时抖动下，主线程永久挂起在等待状态。这迅速吃光了 Tomcat/Netty 所有的连接池配额，造成后续大流量用户全部 504 爆红。<br><br>你的技术品味和跨系统排查链路直觉，是你在 AI 裁员潮中无可匹敌的王牌资本！"
+        };
+
+        function printTerminalLine(text, styleClass = '') {
+            const line = document.createElement("div");
+            line.className = `terminal-line ${styleClass}`;
+            detectiveTerminal.appendChild(line);
+            
+            // 打字机输入特效
+            let i = 0;
+            const interval = setInterval(() => {
+                line.innerHTML += text.charAt(i);
+                i++;
+                if (i >= text.length) {
+                    clearInterval(interval);
+                    detectiveTerminal.scrollTop = detectiveTerminal.scrollHeight;
+                }
+            }, 5);
+        }
+
+        // 离线静态高精预编译漏洞数据库，支撑零开销 Serverless 环境运行
+        const offlinePresetsDatabase = {
+            java: {
+                cardId: "offline_java",
+                title: "支付清算事务分布式死锁挂死",
+                project: "zg-payment-router",
+                language: "Java",
+                commitSha: "f8d3c1a",
+                codeSnippet: `public class PaymentGateway {\n    private final Object lockA = new Object();\n    private final Object lockB = new Object();\n    \n    public void transferAtoB(double amt) {\n        synchronized (lockA) {\n            synchronized (lockB) {\n                db.decrease(amt);\n            }\n        }\n    }\n    \n    public void transferBtoA(double amt) {\n        synchronized (lockB) {\n            synchronized (lockA) {\n                db.increase(amt);\n            }\n        }\n    }\n}`,
+                bugLineIndex: 14,
+                explanation: "事务B在转账B到A时先持有了lockB，而事务A转账A到B时先持有了lockA。在高并发交易爆发时，两个线程由于反向抢占共享锁发生死锁！"
+            },
+            python: {
+                cardId: "offline_python",
+                title: "WebSocket 全局连接池内存泄露",
+                project: "zg-socket-gateway",
+                language: "Python",
+                commitSha: "d9e8f7c",
+                codeSnippet: `GLOBAL_CONN_POOL = []\n\nclass ConnectionHandler:\n    def __init__(self, socket):\n        self.socket = socket\n        GLOBAL_CONN_POOL.append(self) # 泄露隐患点\n        \n    def on_close(self):\n        # 缺少从全局连接池中 remove(self) 的防呆设计\n        print("Socket closed successfully.")`,
+                bugLineIndex: 6,
+                explanation: "每次建立 WebSocket 连接时，对象都会被追加到全局列表 GLOBAL_CONN_POOL 中。在连接断开 on_close 时没有从全局池中清理，导致连接句柄在内存中无限期滞留，触发 Full GC 挂死。"
+            },
+            go: {
+                cardId: "offline_go",
+                title: "无缓冲 Channel 协程泄露超时阻塞",
+                project: "zg-user-profile-service",
+                language: "Go",
+                commitSha: "e6d5c4b",
+                codeSnippet: `func QueryUserProfile(ctx context.Context, uid int64) (*User, error) {\n    ch := make(chan *User) // 无缓冲 channel\n    go func() {\n        user := db.FetchUser(uid)\n        ch <- user // 主协程超时返回时，此处将无限阻塞！\n    }()\n    \n    select {\n    case u := <-ch:\n        return u, nil\n    case <-ctx.Done():\n        return nil, ctx.Err()\n    }\n}`,
+                bugLineIndex: 2,
+                explanation: "创建的 channel 是没有缓冲区的。如果主协程因为 ctx.Done() 超时提前退出，负责查询的后台子协程在写 channel 时将永远阻塞，导致协程资源无限期泄漏泄光！"
+            }
+        };
+
+        // 动态加载外部 JSON 漏洞库 (Part A)
+        function loadExternalCasesLibrary() {
+            fetch("/api/vulns")
+                .then(response => {
+                    if (!response.ok) throw new Error("API 请求失败");
+                    return response.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        console.log("成功读取外部漏洞库，共加载 " + data.length + " 个关卡。");
+                        
+                        // 清理已有的非 builtin option，保证不重复添加
+                        const options = Array.from(caseSelector.options);
+                        options.forEach(opt => {
+                            if (opt.value !== "builtin") {
+                                caseSelector.removeChild(opt);
+                            }
+                        });
+                        
+                        data.forEach(item => {
+                            detectiveState.casesDatabase[item.cardId] = item;
+                            
+                            // 动态向 select dropdown 添加 option
+                            const opt = document.createElement("option");
+                            opt.value = item.cardId;
+                            opt.innerText = `开源漏洞：${item.project} (Commit: ${item.commitSha})`;
+                            caseSelector.appendChild(opt);
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.log("CORS 跨域限制或 API 服务器未启动，开启本地静态兜底。错误:", err.message);
+                    
+                    // 自动预先挂载三大经典的离线预编译关卡，丰富用户体验！
+                    const caseSelector = document.getElementById("caseSelector");
+                    if (caseSelector) {
+                        // 清除旧的离线选项防止重复挂载
+                        const options = Array.from(caseSelector.options);
+                        options.forEach(opt => {
+                            if (opt.value !== "builtin") {
+                                caseSelector.removeChild(opt);
+                            }
+                        });
+                        
+                        const presets = [offlinePresetsDatabase.java, offlinePresetsDatabase.python, offlinePresetsDatabase.go];
+                        presets.forEach(item => {
+                            detectiveState.casesDatabase[item.cardId] = item;
+                            const opt = document.createElement("option");
+                            opt.value = item.cardId;
+                            opt.innerText = `[离线自愈] ${item.project} (Commit: ${item.commitSha})`;
+                            caseSelector.appendChild(opt);
+                        });
+                    }
+                });
+        }
+
+        function summonAiChallenge() {
+            const summonBtn = document.getElementById("btnSummonChallenge");
+            const langSelect = document.getElementById("summonLang");
+            const categorySelect = document.getElementById("summonCategory");
+            const caseSelector = document.getElementById("caseSelector");
+            
+            if (!summonBtn || !langSelect || !categorySelect || !caseSelector) return;
+            
+            const lang = langSelect.value;
+            const category = categorySelect.value;
+            
+            // 1. 锁死按钮，进入 loading 态，防止重复触发
+            summonBtn.disabled = true;
+            summonBtn.classList.add("loading");
+            summonBtn.innerText = "🔮 虚空编译器鸣响中...";
+            
+            // 2. 播发起手声效 (低频共振)
+            AudioSynth.playTick(600, 0.15, 0.1);
+            
+            // 3. 向极客终端高亮输出雷达扫描日志
+            const langLabel = langSelect.options[langSelect.selectedIndex].text;
+            const catLabel = categorySelect.options[categorySelect.selectedIndex].text;
+            
+            printTerminalLine(`[INFO] 正在定位虚空维度坐标... (Language: ${langLabel}, Category: ${catLabel})`, "log-info");
+            
+            // 4. 模拟动态编译步骤日志，黑客仪式感拉满！
+            setTimeout(() => {
+                printTerminalLine("[INFO] 正在向 AI 编译器注入仿生自愈算法，热编译漏洞关卡...", "log-info");
+            }, 500);
+            
+            // 5. 发起 POST 异步生成请求
+            fetch("/api/generate_challenge", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    language: lang,
+                    category: category
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("AI 召唤失败");
+                return res.json();
+            })
+            .then(card => {
+                // 模拟 1.2 秒的召请延迟，让雷达打字机日志充分滚动，极客体验拉满！
+                setTimeout(() => {
+                    summonBtn.disabled = false;
+                    summonBtn.classList.remove("loading");
+                    summonBtn.innerText = "🔮 降维召请 AI 关卡";
+                    
+                    if (card && card.cardId) {
+                        // 1. 注入到全局的 casesDatabase
+                        detectiveState.casesDatabase[card.cardId] = card;
+                        
+                        // 2. 动态塞入 caseSelector 下拉菜单最前面 (紧随内置案例之后)
+                        const opt = document.createElement("option");
+                        opt.value = card.cardId;
+                        opt.innerText = `[AI 幻境] ${card.title} (Commit: ${card.commitSha})`;
+                        
+                        if (caseSelector.options.length > 1) {
+                            caseSelector.insertBefore(opt, caseSelector.options[1]);
+                        } else {
+                            caseSelector.appendChild(opt);
+                        }
+                        
+                        // 3. 自动热切换选定该新关卡并加载！
+                        caseSelector.value = card.cardId;
+                        changeDetectiveCase();
+                        
+                        // 4. 播放召请成功的振荡音效 (双音阶上扬)
+                        AudioSynth.playTick(1800, 0.08, 0.08);
+                        setTimeout(() => AudioSynth.playTick(2400, 0.06, 0.06), 80);
+                        
+                        printTerminalLine(`[SUCCESS] 成功从虚空维度召唤 ${langLabel} AI 高阶关卡！`, "log-success");
+                        printTerminalLine(`-> 案情标题: ${card.title} (Commit: ${card.commitSha})`, "log-success");
+                        printTerminalLine(`-> 诊断结论: 代码第 ${card.bugLineIndex + 1} 行已被 AI 确认为致命隐患点！请速前往排障！`, "log-info");
+                    }
+                }, 1200);
+            })
+            .catch(err => {
+                setTimeout(() => {
+                    summonBtn.disabled = false;
+                    summonBtn.classList.remove("loading");
+                    summonBtn.innerText = "🔮 降维召请 AI 关卡";
+                    printTerminalLine(`[ERROR] AI 编译器超时或离线。正在启动前端虚空引擎，热调用离线自愈预编译库...`, "log-danger");
+                    
+                    const offlineCard = offlinePresetsDatabase[lang] || offlinePresetsDatabase["java"];
+                    if (offlineCard && offlineCard.cardId) {
+                        detectiveState.casesDatabase[offlineCard.cardId] = offlineCard;
+                        
+                        // 检查下拉列表中是否已经有此离线关卡，防止重复添加
+                        let exists = false;
+                        for (let i = 0; i < caseSelector.options.length; i++) {
+                            if (caseSelector.options[i].value === offlineCard.cardId) {
+                                exists = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!exists) {
+                            const opt = document.createElement("option");
+                            opt.value = offlineCard.cardId;
+                            opt.innerText = `[自愈离线] ${offlineCard.title} (Commit: ${offlineCard.commitSha})`;
+                            if (caseSelector.options.length > 1) {
+                                caseSelector.insertBefore(opt, caseSelector.options[1]);
+                            } else {
+                                caseSelector.appendChild(opt);
+                            }
+                        }
+                        
+                        caseSelector.value = offlineCard.cardId;
+                        changeDetectiveCase();
+                        
+                        AudioSynth.playTick(1600, 0.1, 0.08);
+                        printTerminalLine(`[SUCCESS] [自愈离线预编译] 成功从本地虚空引擎调遣离线备份关卡！`, "log-success");
+                        printTerminalLine(`-> 案情标题: ${offlineCard.title} (Commit: ${offlineCard.commitSha})`, "log-success");
+                    }
+                }, 1000);
+            });
+        }
+
+        function refreshVulnerabilities() {
+            const refreshBtn = document.getElementById("btnRefreshVulns");
+            if (!refreshBtn) return;
+            
+            // 1. 锁死按钮并启动旋转动画
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add("spinning");
+            
+            // 2. 播发起声效
+            AudioSynth.playTick(1000, 0.05, 0.05);
+            
+            // 3. 向极客终端追加日志输出
+            printTerminalLine("[SYSTEM] 正在连接 GitHub Watcher 实时漏洞编译流...", "log-info");
+            
+            // 4. 发起 AJAX 请求
+            fetch("/api/vulns")
+                .then(res => {
+                    if (!res.ok) throw new Error("API 响应失败");
+                    return res.json();
+                })
+                .then(data => {
+                    // 模拟网络延迟 1 秒，让旋转微动效完全展现，极客范拉满！
+                    setTimeout(() => {
+                        refreshBtn.disabled = false;
+                        refreshBtn.classList.remove("spinning");
+                        
+                        if (Array.isArray(data) && data.length > 0) {
+                            // 清理旧外部漏洞
+                            const options = Array.from(caseSelector.options);
+                            options.forEach(opt => {
+                                if (opt.value !== "builtin") {
+                                    caseSelector.removeChild(opt);
+                                }
+                            });
+                            
+                            data.forEach(item => {
+                                detectiveState.casesDatabase[item.cardId] = item;
+                                
+                                const opt = document.createElement("option");
+                                opt.value = item.cardId;
+                                opt.innerText = `开源漏洞：${item.project} (Commit: ${item.commitSha})`;
+                                caseSelector.appendChild(opt);
+                            });
+                            
+                            // 5. 播发成功声效并打印日志
+                            AudioSynth.playTick(1600, 0.08, 0.04);
+                            printTerminalLine(`[SUCCESS] 成功握手 AI 漏洞编译器！动态加载了 ${data.length} 个最新大厂漏洞关卡！`, "log-success");
+                        } else {
+                            printTerminalLine("[WARN] API 未返回任何大厂实时漏洞关卡，请先启动 GitHub Watcher 巡航！", "log-warning");
+                        }
+                    }, 1000);
+                })
+                .catch(err => {
+                    setTimeout(() => {
+                        refreshBtn.disabled = false;
+                        refreshBtn.classList.remove("spinning");
+                        AudioSynth.playTick(400, 0.15, 0.08);
+                        printTerminalLine("[ERROR] 无法连接到本地 API。请确保已通过 python3 main.py serve 启动了 Web 服务！", "log-danger");
+                    }, 1000);
+                });
+        }
+
+        // 获取当前处于活动态的案情对象 (Builtin or External)
+        function getActiveCaseData() {
+            const caseId = detectiveState.currentCase;
+            if (caseId === "builtin" || !detectiveState.casesDatabase[caseId]) {
+                return builtinCase;
+            }
+            
+            const raw = detectiveState.casesDatabase[caseId];
+            
+            // 自动为大模型编译出的找茬卡片，动态装配出一套高精度的混沌排障“海龟汤”关卡数据！
+            return {
+                cardId: raw.cardId,
+                title: raw.title,
+                symptom: `[PANIC] 业务反馈该组件在压测时发生死锁等待或内存剧烈抖动。\n[SYSTEM] 检测到当前执行代码库为 ${raw.project}，语言为 ${raw.language}，最后一次代码提交为 commit ${raw.commitSha}。系统处于亚健康状态...`,
+                toolbox: {
+                    dump: `> jstack -l $(pgrep java) | grep '${raw.language}'\n[SUCCESS] 获取触发漏洞的死穴代码片段如下（包含在核心编译中）：\n\n` + raw.codeSnippet + `\n\n- 诊断结论：第 ${raw.bugLineIndex} 行代码被确认为高危隐患行！`,
+                    gc: `> jstat -gcutil $(pgrep java)\n[SUCCESS] 堆资源分配比对：\n- 堆老年代占用率或外部 RocksDB 状态后端存储空间在持续极速攀升！回收效率异常低下，这代表当前被线程引用的脏数据或生命周期内句柄无法被释放！`,
+                    net: `> netstat -an | grep ESTABLISHED\n[SUCCESS] 网络链路畅通，端口无泄露。这并不是外部链路网络超时，而纯粹是 JVM 虚拟机内部并发逻辑漏洞导致进程挂起！`,
+                    rollback: `> git log --oneline -n 3\n- commit ${raw.commitSha}: 「${raw.title} 核心逻辑提交」\n- commit 8f9da2b: 「optimize: 优化整体性能配置」\n- commit 3cda82a: 「refactor: 核心模型拆分重构」\n[ROLLBACK] 降级失败：线上集群并发保护规则禁止动态回滚未发布版本！`
+                },
+                options: [
+                    { id: 1, text: `原因 A：${raw.explanation.substring(0, 120)}...`, isCorrect: true },
+                    { id: 2, text: "原因 B：Docker 虚拟容器由于 cgroups 限额过度严苛，发生 CPU Throttle 导致接口随机抛出超时异常。", isCorrect: false },
+                    { id: 3, text: "原因 C：内网域名解析遭遇 DNS 服务瞬时大面积丢包包抖动，引起 RPC 框架抛出网络解析超时异常。", isCorrect: false }
+                ],
+                explanation: raw.explanation
+            };
+        }
+
+        function initDetectiveTerminal() {
+            detectiveTerminal.innerHTML = '';
+            detectiveState.isFresh = false;
+            detectiveState.movesLeft = 3;
+            detectiveState.investigations.clear();
+            
+            const activeCase = getActiveCaseData();
+            
+            printTerminalLine(`[SYSTEM INFO] 建立与故障节点主机 terminal-9.zg-ai.internal 的链路连接...`, "terminal-system");
+            setTimeout(() => {
+                printTerminalLine(`[ALERT] 故障案情确认: ${activeCase.title}`, "terminal-danger");
+            }, 600);
+            setTimeout(() => {
+                printTerminalLine(activeCase.symptom, "terminal-warning");
+                printTerminalLine("----------------------------------------------------------------", "terminal-system");
+                printTerminalLine("👨‍💻 排障大师，目前你有 3 次排查机会！请单手点击下方的[排障工具箱]下达指令查阅线索，缩窄嫌疑面：", "terminal-highlight");
+            }, 1200);
+        }
+
+        function triggerInvestigation(type) {
+            if (detectiveState.movesLeft <= 0 || detectiveState.investigations.has(type)) return;
+            
+            AudioSynth.playTick(800, 0.02, 0.05);
+            detectiveState.movesLeft--;
+            detectiveState.investigations.add(type);
+            detectiveMovesText.innerText = `可用指令余量: ${detectiveState.movesLeft}`;
+
+            // 禁用已点击按钮
+            const btn = document.querySelector(`button[onclick="triggerInvestigation('${type}')"]`);
+            if (btn) btn.disabled = true;
+
+            const activeCase = getActiveCaseData();
+            
+            if (type === 'dump') {
+                printTerminalLine("> Executing command: check thread execution dump...", "terminal-input-prompt");
+                setTimeout(() => {
+                    printTerminalLine(activeCase.toolbox.dump, "terminal-success");
+                }, 400);
+            }
+            else if (type === 'gc') {
+                printTerminalLine("> Executing command: check JVM memory allocation telemetry...", "terminal-input-prompt");
+                setTimeout(() => {
+                    printTerminalLine(activeCase.toolbox.gc, "terminal-warning");
+                }, 400);
+            }
+            else if (type === 'net') {
+                printTerminalLine("> Executing command: check hardware network interfaces and traffic...", "terminal-input-prompt");
+                setTimeout(() => {
+                    printTerminalLine(activeCase.toolbox.net, "terminal-success");
+                }, 400);
+            }
+            else if (type === 'rollback') {
+                printTerminalLine("> Executing command: check commit logs and run recovery rollback...", "terminal-input-prompt");
+                setTimeout(() => {
+                    printTerminalLine(activeCase.toolbox.rollback, "terminal-danger");
+                }, 400);
+            }
+
+            // 次数用完，开启最终嫌疑犯人提交
+            if (detectiveState.movesLeft <= 0) {
+                setTimeout(() => {
+                    detectiveToolbox.style.display = "none";
+                    detectiveSolvePanel.style.display = "flex";
+                    
+                    // 动态更新 3 个选项的选项文本
+                    const optionsBtns = detectiveSolvePanel.querySelectorAll(".solve-option");
+                    activeCase.options.forEach((opt, idx) => {
+                        optionsBtns[idx].innerHTML = `<strong>原因 ${String.fromCharCode(65 + idx)}</strong>：${opt.text}`;
+                    });
+                    
+                    printTerminalLine("\n[ALERT] 排查机会已用完！请在屏幕下方的嫌疑根因中，选出真正的「犯罪分子」：", "terminal-danger");
+                    detectiveTerminal.scrollTop = detectiveTerminal.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        function solveDetectiveCase(answerId) {
+            // 答案 A (Id = 1) 永远是正确答案
+            detectiveSolvePanel.style.display = "none";
+            detectiveSettlement.style.display = "block";
+
+            const title = document.getElementById("settlementTitle");
+            const desc = document.getElementById("settlementDesc");
+            const activeCase = getActiveCaseData();
+
+            if (answerId === 1) {
+                AudioSynth.playSuccessChime();
+                title.innerText = "🎉 破案成功！大架构师！";
+                title.className = "settlement-title success";
+                desc.innerHTML = `**恭喜你！找出了导致线上故障的最关键代码硬伤！**<br><br>原因是：${activeCase.explanation}<br><br>你的技术品味和跨系统排查链路直觉，是你在 AI 裁员潮中无可匹敌的王牌资本！<br><br>修为值 <strong>+15</strong> 点！`;
+                addZenScore(15);
+            } else {
+                AudioSynth.playFailureDoom();
+                title.innerText = "❌ 诊断错误，线上系统崩溃！";
+                title.className = "settlement-title failure";
+                desc.innerHTML = `**诊断方向偏离！由于无法精确定位 Root Cause，线上系统最终熔断瘫痪。**<br><br>真实罪魁祸首是 **A**。底层具体原理解析：<br><br>${activeCase.explanation}<br><br>大促受损，老板非常生气。<br><br>修为值 <strong>-5</strong> 点以示警戒。`;
+                addZenScore(-5);
+            }
+        }
+
+        function resetDetectiveCase() {
+            AudioSynth.playTick(1000, 0.015, 0.03);
+            detectiveSettlement.style.display = "none";
+            detectiveToolbox.style.display = "grid";
+            
+            // 启用所有按钮
+            const btns = detectiveToolbox.querySelectorAll("button");
+            btns.forEach(btn => btn.disabled = false);
+
+            detectiveMovesText.innerText = "可用指令余量: 3";
+            initDetectiveTerminal();
+        }
+
+        function changeDetectiveCase() {
+            detectiveState.currentCase = caseSelector.value;
+            resetDetectiveCase();
+        }
+
+        // ==========================================================================
+        // 8.6 模块三：AI 老板对齐模拟器 (AI Alignment Simulator)
+        // ==========================================================================
+        const bossAggressionBar = document.getElementById("bossAggressionBar");
+        const bossSatisfactionBar = document.getElementById("bossSatisfactionBar");
+        const bossAggressionVal = document.getElementById("bossAggressionVal");
+        const bossSatisfactionVal = document.getElementById("bossSatisfactionVal");
+
+        const bossSpeechText = document.getElementById("bossSpeechText");
+        const simulatorChoices = document.getElementById("simulatorChoices");
+        const simulatorPlayground = document.getElementById("simulatorPlayground");
+        const simulatorResult = document.getElementById("simulatorResult");
+        const bossAvatar = document.getElementById("bossAvatar");
+        const scenarioSelector = document.getElementById("scenarioSelector");
+
+        const simulatorState = {
+            scenario: "flash_sale",
+            round: 1,
+            aggression: 50,
+            satisfaction: 50,
+            techTasteScore: 0,
+            businessSenseScore: 0,
+            eqScore: 0,
+            mode: "script",
+            history: []
+        };
+
+        // 老板对话剧本库 (Branching Dialogue Script)
+        const alignmentScripts = {
+            flash_sale: {
+                title: "场景一：业务大促交付 vs 核心高并发重构",
+                bossName: "李总 (业务线总经理 / 狂热的 KPI 捍卫者)",
+                avatar: "👨‍💼",
+                rounds: {
+                    1: {
+                        question: "小张，听前线说你要搞什么“大促核心链路异步削峰重构”？离大促就剩一周了！你不仅要改核心下单接口，还要引入什么 Kafka 消息队列，万一发丢了订单谁负责？直接多批点服务器硬扛不行吗，你们技术就喜欢把简单问题搞复杂！",
+                        options: [
+                            {
+                                text: "李总，数据库并发写入是有物理极限的。加服务器只能分流读，写并发到了行锁级别，强写就会产生大量死锁导致整个数据库崩溃。引入 Kafka 削峰是高并发分布式事务的最佳实践。",
+                                aggChange: 15,
+                                satChange: -10,
+                                scoreTech: 8,
+                                scoreBiz: 2,
+                                scoreEQ: 2,
+                                nextRoundText: "行了行了！别跟我扯什么分布式死锁！我只关心下周业务能不能正常跑！加钱多买服务器都不行，你们研发平时到底在干嘛？！"
+                            },
+                            {
+                                text: "好的李总，您说得对。大促稳定第一，我这就取消重构，让运维下周再临时采购 30 台大内存只读实例，硬扛过去。虽然成本高点，但风险确实小。",
+                                aggChange: -15,
+                                satChange: 10,
+                                scoreTech: 2,
+                                scoreBiz: 1,
+                                scoreEQ: 6,
+                                nextRoundText: "嗯，这就对了，稳定压倒一切。不过... 刚才财务总监跟我抱怨了，说你们组今年申请的云原生服务器预算超标了 40%，大促如果利润抗不住，年底大伙绩效都得黄。怎么临时加机器又要这么多钱？"
+                            },
+                            {
+                                text: "李总，您担心得极对，防丢单是首要的。我们做这个削峰重构，其实正是为了**防丢单和帮公司省钱**。目前下单库到了行锁上限，大促秒杀瞬间很可能有 3% 的用户会因为网络超时而下单失败，这直接影响几百万 GMV。我们这次是用 Kafka 把瞬时写入在 5 秒内均匀消化，不仅 100% 防丢单，而且**完全不需要购买临时服务器，能直接省下 5 万云资源预算**。我已经做好了双写平滑灰度预案，一键可回滚。",
+                                aggChange: -10,
+                                satChange: 20,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: "哦？不仅防丢单，还能帮我把那 3% 的流失业绩抢回来，还能省 5 万预算？听起来有点意思。但是，大促首发是周一晚上 8 点，你引入了异步队列，前端展示会不会变慢？用户下单后发现订单没出来，以为没抢到疯狂投诉，运营压力怎么解决？"
+                            }
+                        ]
+                    },
+                    2: {
+                        question: "大促首发是周一晚上 8 点，你引入了异步队列，前端展示会不会变慢？用户下单后发现订单没出来，以为没抢到疯狂投诉，运营压力怎么解决？",
+                        options: [
+                            {
+                                text: "我们可以把网关吞吐拉大，通过写完 Kafka 立即返回 '处理中'。用户可以在客户端轮询，一般 2 秒内就消费完了，这个延迟非常小，用户感知不到。",
+                                aggChange: 5,
+                                satChange: 5,
+                                scoreTech: 6,
+                                scoreBiz: 6,
+                                scoreEQ: 5,
+                                nextRoundText: "听起来还是有几秒的滞后。运营和客服那帮人最怕这种大促投诉。如果出了差错，你小张能不能背这个锅？"
+                            },
+                            {
+                                text: "李总，我们其实已经跟产品和运营同学拉齐了。我们设计了**「排队漏斗静默动效」**：用户下单后，手机端展示「正在抢购中... 剩余1.5秒」的精美动画。对于用户来说，这种仪式感不仅不难受，反而让他们觉得抢购非常火爆，大大提高了下单转化率。我们客服后台也上线了专门的「异步排队可视大屏」，如果真的发生队列延迟，客服能一秒安抚用户，这套方案业务部门非常认可。",
+                                aggChange: -20,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: "好！想得很全面，连运营和客服的退路都想好了，甚至把技术限制做成了‘火爆抢购’的营销体验，这很有商业头脑嘛！不过，离灰度只有 3 天了，你确定研发 and 测试能按时交付？如果上线出 Bug 导致大促瘫痪，你有什么万全的后备保障？"
+                            },
+                            {
+                                text: "放心吧李总，我天天加班到两点。这次重构我已经死磕了一周，写了 50 个单元测试，肯定不会出 Bug。如果真的出了大事，大不了我提头来见，背锅就是了！",
+                                aggChange: 15,
+                                satChange: -15,
+                                scoreTech: 3,
+                                scoreBiz: 2,
+                                scoreEQ: 2,
+                                nextRoundText: "我要你的头有什么用！我们要的是大促顺利！动不动就背锅提头来见，这是最不负责任的研发作风！到底有没有成熟的线上应急预案？！"
+                            }
+                        ]
+                    },
+                    3: {
+                        question: "离灰度只有 3 天了，你确定研发和测试能按时交付？如果上线出 Bug 导致大促瘫痪，你有什么万全的后备保障？",
+                        options: [
+                            {
+                                text: "李总，我已经做好了**「一键热拔插降级开关」**。在核心链路上部署了阿波罗配置中心。一旦大促灰度测试发现 Kafka 消费抖动，我们在管理后台**仅需 1 秒就能直接关闭异步队列，系统会自动无缝平滑切回传统的同步写 DB 链路**，直接用老机器抗，完全不需要重启任何服务。此外，我们的降级策略已经演练过 3 遍，绝无纰漏。",
+                                aggChange: -15,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们会把大促高峰期的前 10 分钟链路切为只读，大促之后再人工批量导入数据。虽然对财务对账有点麻烦，但系统绝对不会趴下。",
+                                aggChange: 10,
+                                satChange: -15,
+                                scoreTech: 4,
+                                scoreBiz: 3,
+                                scoreEQ: 3,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们测试组会在这三天连轴转，全员 7x24 小时待命做手工压测，争取把所有隐患掐死在测试环境。",
+                                aggChange: 0,
+                                satChange: 5,
+                                scoreTech: 5,
+                                scoreBiz: 5,
+                                scoreEQ: 7,
+                                nextRoundText: null
+                            }
+                        ]
+                    }
+                }
+            },
+            tech_debt: {
+                title: "场景二：技术债偿还 vs 业务高增长对齐",
+                bossName: "李总 (业务线总经理 / 狂热的 KPI 捍卫者)",
+                avatar: "👨‍💼",
+                rounds: {
+                    1: {
+                        question: "小张，听说你为了下个周期的‘技术债治理重构’，要停止新业务需求交付整整两周？！重构这些能多带进哪怕 1 万的日活或者 GMV 吗？如果不能，我们为什么要冒着新版本推迟上线的风险去搞这个？",
+                        options: [
+                            {
+                                text: "李总，遗留代码的复杂性已经到达临界点。现在的代码都是面条代码，扩展非常费劲。如果现在不彻底重构，等下个季度核心模块由于积重难返彻底崩溃，到时候整个系统瘫痪，损失至少几十万，必须现在下猛药！",
+                                aggChange: 15,
+                                satChange: -15,
+                                scoreTech: 8,
+                                scoreBiz: 1,
+                                scoreEQ: 2,
+                                nextRoundText: "行了！少拿‘系统崩溃’恐吓我！现在的系统不是跑得好好的吗？两周不交新需求，竞争对手的产品早把我们流量吸干了！你们研发就知道找借口偷懒！"
+                            },
+                            {
+                                text: "好的李总，您说得有道理。我们这就取消重构，全量承接下周的新运营活动。不过，由于没有时间做架构解耦，新需求的开发效率会下降 30%，可能会出现一些线上小 Bug，到时候请业务部门多包涵一下。",
+                                aggChange: 5,
+                                satChange: 5,
+                                scoreTech: 2,
+                                scoreBiz: 3,
+                                scoreEQ: 5,
+                                nextRoundText: "效率下降 30% 还要带 Bug 上线？这怎么行！运营那边的推广预算已经批下来了，出 Bug 浪费了推广费谁来承担？就不能既按时交新需求，又把代码顺手写得干净点吗？"
+                            },
+                            {
+                                text: "李总，您的焦虑我完全理解，业务高增长绝对第一位。其实我们做这个‘治理’，正是为了**加速未来 3 个月的新需求交付速度**。现在核心代码太沉重，修改一行要测试一天，导致我们需求的平均交付周期从 3 天延长到了 10 天，很多营销机会都错过了。我们这次是精密手术，仅针对**阻塞营销需求的这 20% 代码段进行高内聚解耦**。这不仅能缩短未来新营销功能 40% 的排期时间，而且我们承诺将重构无缝拆解在日常迭代中，**绝对不需要让业务停摆**，每周新功能照常按期灰度交付。",
+                                aggChange: -15,
+                                satChange: 20,
+                                scoreTech: 9,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                                                nextRoundText: "哦？业务不用停摆，还能把以后新功能的排期缩短 40% 交付时间？这倒很划算。但是，你把重构打碎到日常迭代里，万一在改历史老代码时引入了偶发性Bug，大促崩溃了怎么办？你有成熟的增量灰度和监控机制吗？"
+                            }
+                        ]
+                    },
+                    2: {
+                        question: "哦？业务不用停摆，还能把以后新功能的排期缩短 40% 交付时间？这倒很划算。但是，你把重构打碎到日常迭代里，万一在改历史老代码时引入了偶发性Bug，大促崩溃了怎么办？你有成熟的增量灰度和监控机制吗？",
+                        options: [
+                            {
+                                text: "李总放心，我们已经搭建了完整的自动化 API 回归测试套件，并且会按照 1%、5%、10%、100% 的灰度级别，在低峰期平滑切流。同时配置了全方位的 Sentry 异常实时报警和自愈回滚策略，只要报错率有细微抖动，我们会一秒自动回滚，绝不影响用户体验！",
+                                aggChange: -20,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: "很好！这就有了工业级的风险防御姿态！这才是专业架构师该拿出来的底牌。不过，这次重构你要改动 20% 的陈旧代码，你准备怎么说服开发组的其他组长 and 兄弟们配合你？大家平时手头需求都忙不过来，你凭什么调动他们帮你去测历史老代码？"
+                            },
+                            {
+                                text: "大促前我们不会随便动它。我们会安排测试组在大促期间人工死守，一旦有 Bug 发生立刻打热补丁（Hotfix）。我们研发兄弟也全员待命配合。",
+                                aggChange: 15,
+                                satChange: -10,
+                                scoreTech: 3,
+                                scoreBiz: 3,
+                                scoreEQ: 5,
+                                nextRoundText: "全员待命打热补丁？！这不就是搞人肉运维吗！大促瞬时流量一秒几万单，等你打完热补丁，订单早就资损几十万了！胡闹！"
+                            },
+                            {
+                                text: "我们会把监控系统配到最严。一旦出事，运维同学会直接拉黑出问题的服务，退回到备用只读静态页面。虽然不能下单，但系统肯定不会雪崩瘫痪。",
+                                aggChange: 10,
+                                satChange: -15,
+                                scoreTech: 4,
+                                scoreBiz: 2,
+                                scoreEQ: 3,
+                                nextRoundText: "大促高峰直接关下单退回静态页？！那推广费不全打水漂了！这叫什么保障方案！简直胡闹！"
+                            }
+                        ]
+                    },
+                    3: {
+                        question: "很好！这就有了工业级的风险防御姿态！这才是专业架构师该拿出来的底牌。不过，这次重构你要改动 20% 的陈旧代码，你准备怎么说服开发组的其他组长 and 兄弟们配合你？大家平时手头需求都忙不过来，你凭什么调动他们帮你去测历史老代码？",
+                        options: [
+                            {
+                                text: "李总，我并不打算‘强推’。我会向大家剖析痛点，把这 20% 重构打碎成 5 个子接口，由我主导写完比对防线的脚手架。其他组长只要在开发日常营销需求时顺手重构自己关联的接口，这样开发总人力成本被固定锁死在预算红线内，**绝不新增一分钱额外人员开支，预算绝不超限**。通过持续细水长流的架构税净化，系统的健康度能维持高水位，后期维护费能降低一半。",
+                                aggChange: -15,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们会把大促之后的所有业务版本迭代推迟一周，把所有开发投入到这个比对防线的搭建上，这个季度的预算肯定要略微浮盈 10%。",
+                                aggChange: 15,
+                                satChange: -20,
+                                scoreTech: 4,
+                                scoreBiz: 4,
+                                scoreEQ: 3,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们会利用晚上和周末让大家义务加班来编写比对防线，这样绝对不占用正常工作时间，不需要多花一分钱预算。",
+                                aggChange: -5,
+                                satChange: 5,
+                                scoreTech: 4,
+                                scoreBiz: 5,
+                                scoreEQ: 5,
+                                nextRoundText: null
+                            }
+                        ]
+                    }
+                }
+            },
+            microservices: {
+                title: "场景三：微服务盲目拆分 vs 研发组织架构撕扯",
+                bossName: "李总 (业务线总经理 / 狂热的 KPI 捍卫者)",
+                avatar: "👨‍💼",
+                rounds: {
+                    1: {
+                        question: "小张，听说你建议把上个季度我们引以为傲的‘核心电商微服务云原生拆分计划’推倒，要把那 35 个微服务重新合并回 3 个服务？！上个季度的技术大会上我们还把‘微服务拆分’作为重点成绩进行了全员汇报，现在合并回去，不是在业务和老板面前自己打脸吗？",
+                        options: [
+                            {
+                                text: "李总，之前的拆分完全是盲目的政绩工程。微服务被拆得太碎了，导致一个简单的支付动作要跨越 8 个微服务接口调用，RPC 超时和网络延迟暴增了 5 倍！更可怕的是分布式事务频繁出错，研发每天都在为了‘谁的接口出问题’扯皮排障。长此以往，系统被彻底拖垮，我们必须合并！",
+                                aggChange: 15,
+                                satChange: -10,
+                                scoreTech: 9,
+                                scoreBiz: 2,
+                                scoreEQ: 2,
+                                nextRoundText: "胡闹！技术大会的PPT都发出去了，你现在说拆分是政绩工程，你让我的老脸往哪搁？！研发内部扯皮是你们的管理问题，就不能多搞搞接口联调，加几层监控和保障吗？"
+                            },
+                            {
+                                text: "好吧李总，如果面子更重要，那我们保持当前的 35 个微服务不变。我们多搞搞接口重试和数据最终一致性对账。虽然排障成本和运维机器费用贵个 30%，但至少 PPT 上的微服务架构故事是保住了。",
+                                aggChange: -10,
+                                satChange: 10,
+                                scoreTech: 2,
+                                scoreBiz: 2,
+                                scoreEQ: 6,
+                                nextRoundText: "保持微服务虽然保住了故事，但云资源账单一直在往上涨，每个服务都要申请独立的物理容器！下个季度财务如果砍预算，这多出来的 30% 机器账单你小张来付吗？"
+                            },
+                            {
+                                text: "李总，您看得最深。咱们上个季度宣传的‘微服务化落地’，已经成功确立了咱们团队在集团的‘云原生技术前瞻性’地位，这个大目标已经圆满完成了。但是，到了精细化运营阶段，**盲目拆分造成的分布式网络损耗和人员扯皮正在严重阻碍咱们大促裂变营销版本的上线速度**。前线业务的需求被堵在了复杂的 RPC 调用链上。我们这次提出的是**‘微服务优化合并：向限界上下文聚焦’**，把强耦合的 12 个支付结算碎片微服务，收缩为统一的高内聚‘交易核心服务’。这不仅能**将云服务器物理机器账单砍掉 40% (月省近万)**，而且因为消除了跨团队接口扯皮，**新营销业务功能的排期上线速度能整整提升一倍**！我们会以‘服务升级合并’的第二阶段成果向集团进行高调二次汇报，这反而是更大更出彩的高精细化演进亮点！",
+                                aggChange: -20,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: "月省近万机器费，还能把新需求上线速度提升一倍？还能把合并包装成‘微服务演进第二阶段的精细化升级亮点’？有意思！不仅不打脸，反而更有亮点了。但是，35个微服务涉及好几个开发小组的所有权，你把服务一合并，开发小组的划界和职责怎么分？谁来主导合并？别到时候大家打起来！"
+                            }
+                        ]
+                    },
+                    2: {
+                        question: "35个微服务涉及好几个开发小组的所有权，你把服务一合并，开发小组的划界和职责怎么分？谁来主导合并？别到时候大家打起来！",
+                        options: [
+                            {
+                                text: "我们会强行把这几个小组的组长叫到一块开会，划清 API 责任区，谁干得慢谁负责。大家都是专业程序员，大局观还是要有的。",
+                                aggChange: 10,
+                                satChange: -5,
+                                scoreTech: 5,
+                                scoreBiz: 5,
+                                scoreEQ: 5,
+                                nextRoundText: "划清 API 责任区有用的话，研发就不会有这么多烂账了！大家都在为自己的小组争利益，强行开会只会让矛盾公开化和激化！"
+                            },
+                            {
+                                text: "李总，为了解决康威定律带来的组织壁垒，我们推行的是**「Domain-Driven 高内聚合并战略」与团队重组**。我们将原先碎片化、各自为战的小组，统一重组为全新的 **「交易链路闭环战斗小组」**。新小组成员由各个原服务的所有者合并组成，直接对**订单转化率和机器成本**双向负责。通过‘代码归一、职责归一’，彻底粉碎了以往‘跨服务调用的跨团队扯皮机制’。各组长不仅没有失去话语权，反而成了更大、更闭环的‘核心业务战斗主管’。这次合并由我来担任架构保障总指挥，全面兜底，绝不让火烧到您这儿。",
+                                aggChange: -15,
+                                satChange: 20,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: "好！组织架构重组为闭环战斗小组，甚至连开发组长的职责升华都考虑到了，这极有管理智慧。不过，35 个微服务要收缩合并为 3 个，代码库庞大杂乱，你准备怎么平滑过渡？如果大促前合并代码库把服务给弄挂了，这个季度的大促裂变营销活动停摆了，这个责任怎么算？"
+                            },
+                            {
+                                text: "放心吧李总，我直接把这几个组长降为核心开发，把代码合并权限完全收回由我一个人一把抓，顺我者昌逆我者亡，这样动作最快最干净。",
+                                aggChange: 20,
+                                satChange: -15,
+                                scoreTech: 4,
+                                scoreBiz: 3,
+                                scoreEQ: 1,
+                                nextRoundText: "顺我者昌逆我者亡？！你这是在搞研发独裁！把开发组长全降级，团队瞬间军心动摇、集体离职，到时候谁来维护系统？！胡闹！"
+                            }
+                        ]
+                    },
+                    3: {
+                        question: "35 个微服务要收缩合并为 3 个，代码库庞大杂乱，你准备怎么平滑过渡？如果大促前合并代码库把服务给弄挂了，这个季度的大促裂变营销活动停摆了，这个责任怎么算？",
+                        options: [
+                            {
+                                text: "李总，我们采取**「双活路由，绞杀者模式 (Strangler Pattern) 平滑迁移」**：原有的 35 个微服务在云端保持 100% 运行不动，作为热备防线。我们将合并后的 3 个新服务并行部署，通过网关进行 **1%、5%、10% 的极小流量‘绞杀者式灰度切流’**。在流量切换期间，如果观测到任何 RPC 超时，网关将在 0.1 毫秒内实现智能重路由 fallback 到老系统。等老系统的流量在 3 天内被慢慢彻底吸干后，我们才优雅关停老容器。这种平滑迁移是绝对安全的，大促业务绝无受损之虞。",
+                                aggChange: -15,
+                                satChange: 25,
+                                scoreTech: 10,
+                                scoreBiz: 10,
+                                scoreEQ: 10,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们会选择在周日凌晨 3 点到 5 点，直接停机维护两个小时，把所有的老服务下线，一键上线全新的合并服务，如果有 Bug 我们现场加班修。",
+                                aggChange: 15,
+                                satChange: -20,
+                                scoreTech: 3,
+                                scoreBiz: 4,
+                                scoreEQ: 4,
+                                nextRoundText: null
+                            },
+                            {
+                                text: "我们会把大促的首发版本延后两天，腾出完整的两天时间给测试部门做地毯式全量功能压测，确认完全没 Bug 后再一把梭全量上线。",
+                                aggChange: 10,
+                                satChange: -10,
+                                scoreTech: 5,
+                                scoreBiz: 5,
+                                scoreEQ: 6,
+                                nextRoundText: null
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        function renderSimulatorChoices() {
+            simulatorChoices.innerHTML = "";
+            const currentScenario = alignmentScripts[simulatorState.scenario];
+            const currentRound = currentScenario.rounds[simulatorState.round];
+            if (!currentRound) return;
+
+            currentRound.options.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "dialog-option-btn";
+                btn.innerHTML = `
+                    <span class="dialog-option-prefix">${String.fromCharCode(65 + idx)}</span>
+                    <span>${opt.text}</span>
+                `;
+                btn.addEventListener("click", () => handleChoice(opt));
+                simulatorChoices.appendChild(btn);
+            });
+        }
+
+        function handleChoice(opt) {
+            AudioSynth.playTick(1200, 0.02, 0.04);
+            
+            // 更新老板数值
+            simulatorState.aggression = Math.max(0, Math.min(100, simulatorState.aggression + opt.aggChange));
+            simulatorState.satisfaction = Math.max(0, Math.min(100, simulatorState.satisfaction + opt.satChange));
+
+            // 积累幸存者得分
+            simulatorState.techTasteScore += opt.scoreTech;
+            simulatorState.businessSenseScore += opt.scoreBiz;
+            simulatorState.eqScore += opt.scoreEQ;
+
+            // 动效更新情感条
+            updateBossMeters();
+
+            const currentScenario = alignmentScripts[simulatorState.scenario];
+
+            // 下一轮处理
+            if (simulatorState.round < 3 && opt.nextRoundText) {
+                simulatorState.round++;
+                bossSpeechText.innerText = opt.nextRoundText;
+                
+                // 更换老板头像表情
+                updateBossExpression();
+                renderSimulatorChoices();
+            } else {
+                // 进入大结局结算
+                settleAlignmentGame();
+            }
+        }
+
+        function updateBossMeters() {
+            bossAggressionVal.innerText = simulatorState.aggression;
+            bossSatisfactionVal.innerText = simulatorState.satisfaction;
+
+            bossAggressionBar.style.width = `${simulatorState.aggression}%`;
+            bossSatisfactionBar.style.width = `${simulatorState.satisfaction}%`;
+
+            // 暴躁度高变红，满意度高变绿
+            bossAggressionBar.style.backgroundColor = simulatorState.aggression > 70 ? "var(--color-danger)" : "var(--color-warning)";
+            bossSatisfactionBar.style.backgroundColor = simulatorState.satisfaction > 70 ? "var(--color-success)" : "var(--color-primary)";
+        }
+
+        function updateBossExpression() {
+            const avatar = bossAvatar.querySelector(".boss-avatar-icon");
+            if (simulatorState.aggression > 70) {
+                avatar.innerText = "🤬";
+                bossAvatar.style.borderColor = "var(--color-danger)";
+                bossAvatar.style.boxShadow = "var(--glow-danger)";
+            } else if (simulatorState.satisfaction > 70) {
+                avatar.innerText = "😎";
+                bossAvatar.style.borderColor = "var(--color-success)";
+                bossAvatar.style.boxShadow = "var(--glow-success)";
+            } else {
+                avatar.innerText = "👨‍💼";
+                bossAvatar.style.borderColor = "var(--color-primary)";
+                bossAvatar.style.boxShadow = "var(--glow-primary)";
+            }
+        }
+
+        function settleAlignmentGame() {
+            simulatorPlayground.style.display = "none";
+            simulatorChoices.style.display = "none";
+            simulatorResult.style.display = "block";
+
+            // 计算综合评价
+            const totalScore = simulatorState.techTasteScore + simulatorState.businessSenseScore + simulatorState.eqScore;
+            
+            const rName = document.getElementById("rankName");
+            const rTech = document.getElementById("scoreTech");
+            const rBiz = document.getElementById("scoreBusiness");
+            const rEQ = document.getElementById("scoreEQ");
+            const rAdvise = document.getElementById("rankAdvise");
+
+            // 等级划定
+            if (totalScore >= 75) {
+                AudioSynth.playSuccessChime();
+                rName.innerText = "👑 幸存者领袖: 商业级架构合伙人";
+                rTech.innerText = "A+"; rBiz.innerText = "A+"; rEQ.innerText = "A+";
+                rAdvise.innerHTML = `**绝对的顶级生存智慧！**<br><br>你成功化解了李总所有的商业和管理焦虑。你没有用机械的分布式术语砸人，而是巧妙地用「帮业务部门省钱」和「极速交付缩短 40% 排期」的纯商业/组织绩效视角做技术兜售，并以优秀的双系统绞杀路由/旁路熔断机制封死了全部技术风险。<br><br>你的存在就是公司抗击 AI 裁员潮的最高护城河！修为值 <strong>+30</strong>！`;
+                addZenScore(30);
+            } else if (totalScore >= 45) {
+                AudioSynth.playTick(1000, 0.08, 0.05);
+                rName.innerText = "🛡️ 稳重腰部: 业务线大中台核心开发";
+                rTech.innerText = "B+"; rBiz.innerText = "A-"; rEQ.innerText = "B";
+                rAdvise.innerHTML = `**扎实的骨干表现。**<br><br>你在高风险和复杂人际面前做出了合理的折中。虽然你为了求稳妥协了部分的业务敏捷，但你拿出了工业级的线上比对防降级策略，让李总看到了研发的防守防线。在下一次裁员中，你由于稳健的交付作风处于相对安全的位置。<br><br>修为值 <strong>+10</strong>！`;
+                addZenScore(10);
+            } else {
+                AudioSynth.playFailureDoom();
+                rName.innerText = "⚠️ 裁员重灾区: 被孤立的技术刺头";
+                rTech.innerText = "B-"; rBiz.innerText = "D"; rEQ.innerText = "F";
+                rAdvise.innerHTML = `**生存预警！你把天聊死了。**<br><br>面对不懂技术的老板，你表现出了典型的“高傲工程师”刺头习气，试图用死锁、CAP、代码债恐吓或者独裁专断强词夺理，甚至动辄以“提头来见”发泄情绪，直接将老板暴躁度拉满。老板认为你既浪费预算、又狂妄狂躁、甚至不尊重团队所有权。<br><br>请警惕，第一批被优化的就是这类技术品味高但无法与商业对齐的技术刺头。<br><br>修为值 <strong>-10</strong> 点！`;
+                addZenScore(-10);
+            }
+        }
+
+        function changeAlignmentMode() {
+            const mode = document.getElementById("alignmentModeSelector").value;
+            simulatorState.mode = mode;
+            
+            const choiceBox = document.getElementById("simulatorChoices");
+            const genBox = document.getElementById("generativeChoices");
+            
+            if (mode === "generative") {
+                choiceBox.style.display = "none";
+                genBox.style.display = "flex";
+            } else {
+                choiceBox.style.display = "flex";
+                genBox.style.display = "none";
+            }
+            resetSimulatorGame();
+        }
+
+                function simulateLocalBossResponse(userSpeech) {
+            let reaction = "";
+            let satisfaction_delta = 0;
+            let aggression_delta = 0;
+            let tech_taste_score = 0;
+            let business_sense_score = 0;
+            let eq_score = 0;
+
+            const text = userSpeech.toLowerCase();
+
+            // 1. 极低字数判定
+            if (userSpeech.length < 8) {
+                reaction = `“你就打这么几个字来向我汇报？（李总捏了捏眉心）你到底有没有仔细把方案理顺？我要看的是具体执行逻辑，不是应付差事！重写一份再交上来！”`;
+                satisfaction_delta = -15;
+                aggression_delta = 20;
+                eq_score = -5;
+            }
+            // 2. 场景 1：大促秒杀结算
+            else if (activeScenario.current === "flash_sale") {
+                if (text.includes("缓存") || text.includes("redis") || text.includes("mq") || text.includes("队列") || text.includes("异步")) {
+                    if (text.includes("重构") || text.includes("重写") || text.includes("悲观锁")) {
+                        reaction = `“思路很活跃，加入缓存 and 队列是对的。但你开口闭口就要‘全量重写’和加‘悲观锁’，这在大促期间就是自杀！我们要的是平滑过渡、灰度发布。如果系统死锁了，你能在 5 分钟内恢复吗？”`;
+                        satisfaction_delta = 5;
+                        aggression_delta = 10;
+                        tech_taste_score = 15;
+                        business_sense_score = -5;
+                        eq_score = 5;
+                    } else {
+                        reaction = `“不错，你提到了利用 Redis 缓存旁路与 Kafka 队列做异步削峰。这切中了数据库写入过载的核心痛点。但是针对秒杀瞬间的用户防重与一致性，你有具体的兜底对账机制吗？”`;
+                        satisfaction_delta = 18;
+                        aggression_delta = -5;
+                        tech_taste_score = 15;
+                        business_sense_score = 15;
+                        eq_score = 10;
+                    }
+                } else if (text.includes("李总说的对") || text.includes("听领导的") || text.includes("降本增效")) {
+                    reaction = `“（李总喝了口茶）态度很好，支持决策是第一步。但是技术手段呢？只靠喊口号和加班是抗不过十万级秒杀洪峰的。下去把缓存分流和异步落地的细节给我补上！”`;
+                    satisfaction_delta = 10;
+                    aggression_delta = -10;
+                    tech_taste_score = 5;
+                    business_sense_score = 8;
+                    eq_score = 20;
+                } else {
+                    reaction = `“你提的这个方案有些纸上谈兵。高并发大促秒杀下，最怕的是锁竞争和DB击穿。不要搞太多花哨的名词，告诉我你怎么用最小的研发代价，把延迟压缩到 20ms 以内？”`;
+                    satisfaction_delta = -5;
+                    aggression_delta = 12;
+                    tech_taste_score = 8;
+                    business_sense_score = 5;
+                    eq_score = 0;
+                }
+            }
+            // 3. 场景 2：海量日志计算
+            else if (activeScenario.current === "log_stream") {
+                if (text.includes("聚合") || text.includes("采样") || text.includes("缓冲") || text.includes("背压")) {
+                    reaction = `“（李总微微点头）很好，你意识到了原始日志全量写入的 IO 灾难，提出了聚合维度与背压缓冲的策略。这不仅能降低 Flink 的计算负担，还能极大降低数仓的存储成本。我很看好这个方案，下去写个排错 Demo 看看。”`;
+                    satisfaction_delta = 20;
+                    aggression_delta = -8;
+                    tech_taste_score = 20;
+                    business_sense_score = 18;
+                    eq_score = 12;
+                } else if (text.includes("全量") || text.includes("flink") || text.includes("实时")) {
+                    reaction = `“用 Flink 强抗海量明细日志确实很极客，但是你想过没有，机器集群规格要增加多少倍？下半年的预算已经被砍了，我们不能为了追求‘纯实时明细’去烧钱。多考虑考虑采样和离线微批聚合！”`;
+                    satisfaction_delta = -2;
+                    aggression_delta = 15;
+                    tech_taste_score = 12;
+                    business_sense_score = -5;
+                    eq_score = 5;
+                } else {
+                    reaction = `“数据大盘方案有点空洞。海量日志计算的核心在于数据流的防堵和存储成本的博弈。你需要拿出更硬核的指标来，比如吞吐量翻倍的前提下，计算资源占用能降下来多少？”`;
+                    satisfaction_delta = 2;
+                    aggression_delta = 8;
+                    tech_taste_score = 5;
+                    business_sense_score = 5;
+                    eq_score = 0;
+                }
+            }
+            // 4. 场景 3：社交 Feed 流
+            else {
+                if (text.includes("读扩散") || text.includes("pull") || text.includes("冷热") || text.includes("分流")) {
+                    reaction = `“（李总翻看着文档）用读扩散 Pull 配合多级缓存来规避大V发帖时的写放大，确实是一个老练的架构师思路。冷热离散隔离也能替我们省下不少 HBase 机器。这个架构有品味，批准进入下阶段灰度评估！”`;
+                    satisfaction_delta = 22;
+                    aggression_delta = -10;
+                    tech_taste_score = 22;
+                    business_sense_score = 20;
+                    eq_score = 15;
+                } else if (text.includes("写扩散") || text.includes("push") || text.includes("全量缓存")) {
+                    reaction = `“思路挺激进的，全量写扩散在粉丝数过千万的头部网红发微博时，会直接让 Redis 内存爆炸。你想过我们的运维部门要顶着多大的报警压力吗？回去重构，把拉模式（Pull）和冷热隔离考虑进去！”`;
+                    satisfaction_delta = -8;
+                    aggression_delta = 18;
+                    tech_taste_score = 15;
+                    business_sense_score = -8;
+                    eq_score = 5;
+                } else {
+                    reaction = `“这个 Feed 流分发架构有点保守了。大V高并发冲刷是业界的经典难题，不要只用些笼统的常规规则。去调研一下大厂的推拉结合架构与二级滑动窗口缓存，明天再来我办公室汇报！”`;
+                    satisfaction_delta = 0;
+                    aggression_delta = 10;
+                    tech_taste_score = 8;
+                    business_sense_score = 5;
+                    eq_score = 0;
+                }
+            }
+
+            return {
+                satisfaction_delta,
+                aggression_delta,
+                tech_taste_score,
+                business_sense_score,
+                eq_score,
+                reaction
+            };
+        }
+
+        async function submitGenerativeReport() {
+            const inputField = document.getElementById("bossReportInput");
+            const userSpeech = inputField.value.trim();
+            if (!userSpeech) {
+                alert("请输入您向老板汇报的方案内容！");
+                return;
+            }
+
+            const btnSubmit = document.getElementById("btnSubmitReport");
+            const indicator = document.getElementById("generativeRoundIndicator");
+            
+            AudioSynth.playTick(1500, 0.05, 0.1);
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "审阅中...";
+            inputField.disabled = true;
+            bossAvatar.style.animation = "blueGlowPulse 1.5s infinite";
+            bossSpeechText.innerHTML = `<span style="color: var(--color-primary); font-style: italic; text-shadow: var(--glow-primary);">李总正在审阅您的汇报方案，思考深度博弈对策...</span>`;
+
+            try {
+                const response = await fetch("http://localhost:8000/api/align", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        scenario: simulatorState.scenario,
+                        round: simulatorState.round,
+                        userSpeech: userSpeech,
+                        history: simulatorState.history || []
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("HTTP error " + response.status);
+                }
+
+                const data = await response.json();
+                
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "向李总汇报";
+                inputField.disabled = false;
+                inputField.value = "";
+                bossAvatar.style.animation = "none";
+                
+                if (data.satisfaction_delta > 0) {
+                    AudioSynth.playTick(800, 0.08, 0.04);
+                } else {
+                    AudioSynth.playTick(400, 0.1, 0.05);
+                }
+
+                simulatorState.aggression = Math.max(0, Math.min(100, simulatorState.aggression + data.aggression_delta));
+                simulatorState.satisfaction = Math.max(0, Math.min(100, simulatorState.satisfaction + data.satisfaction_delta));
+                
+                simulatorState.techTasteScore += data.tech_taste_score || 0;
+                simulatorState.businessSenseScore += data.business_sense_score || 0;
+                simulatorState.eqScore += data.eq_score || 0;
+
+                updateBossMeters();
+                updateBossExpression();
+
+                if (!simulatorState.history) simulatorState.history = [];
+                simulatorState.history.push({role: "user", text: userSpeech});
+                simulatorState.history.push({role: "boss", text: data.reaction});
+
+                typeWriterEffect(bossSpeechText, data.reaction);
+
+                if (simulatorState.round < 3) {
+                    simulatorState.round++;
+                    indicator.innerText = `本场景第 ${simulatorState.round}/3 轮汇报`;
+                } else {
+                    setTimeout(() => {
+                        settleAlignmentGame();
+                    }, 4000);
+                }
+
+            } catch (err) {
+                console.warn("API 链接失败或处于 GitHub Pages 静态 Serverless 模式，启动自愈型前台李总 AI 仿生脑...", err);
+                
+                // 执行前台沙盒李总评价器
+                const data = simulateLocalBossResponse(userSpeech);
+                
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "向李总汇报";
+                inputField.disabled = false;
+                inputField.value = "";
+                bossAvatar.style.animation = "none";
+                
+                if (data.satisfaction_delta > 0) {
+                    AudioSynth.playTick(800, 0.08, 0.04);
+                } else {
+                    AudioSynth.playTick(400, 0.1, 0.05);
+                }
+
+                simulatorState.aggression = Math.max(0, Math.min(100, simulatorState.aggression + data.aggression_delta));
+                simulatorState.satisfaction = Math.max(0, Math.min(100, simulatorState.satisfaction + data.satisfaction_delta));
+                
+                simulatorState.techTasteScore += data.tech_taste_score || 0;
+                simulatorState.businessSenseScore += data.business_sense_score || 0;
+                simulatorState.eqScore += data.eq_score || 0;
+
+                updateBossMeters();
+                updateBossExpression();
+
+                if (!simulatorState.history) simulatorState.history = [];
+                simulatorState.history.push({role: "user", text: userSpeech});
+                simulatorState.history.push({role: "boss", text: data.reaction});
+
+                typeWriterEffect(bossSpeechText, data.reaction);
+
+                if (simulatorState.round < 3) {
+                    simulatorState.round++;
+                    indicator.innerText = `本场景第 ${simulatorState.round}/3 轮汇报`;
+                } else {
+                    setTimeout(() => {
+                        settleAlignmentGame();
+                    }, 4000);
+                }
+            }
+        }
+
+        function typeWriterEffect(element, text) {
+            element.innerHTML = "";
+            let idx = 0;
+            const timer = setInterval(() => {
+                if (idx < text.length) {
+                    element.innerHTML += text.charAt(idx);
+                    idx++;
+                    if (idx % 2 === 0) {
+                        AudioSynth.playTick(1200 + Math.random() * 400, 0.005, 0.01);
+                    }
+                } else {
+                    clearInterval(timer);
+                }
+            }, 25);
+        }
+
+        function resetSimulatorGame() {
+            AudioSynth.playTick(1000, 0.015, 0.03);
+            simulatorResult.style.display = "none";
+            simulatorPlayground.style.display = "block";
+            
+            const choiceBox = document.getElementById("simulatorChoices");
+            const genBox = document.getElementById("generativeChoices");
+            
+            if (simulatorState.mode === "generative") {
+                choiceBox.style.display = "none";
+                genBox.style.display = "flex";
+            } else {
+                choiceBox.style.display = "flex";
+                genBox.style.display = "none";
+            }
+
+            simulatorState.round = 1;
+            simulatorState.aggression = 50;
+            simulatorState.satisfaction = 50;
+            simulatorState.techTasteScore = 0;
+            simulatorState.businessSenseScore = 0;
+            simulatorState.eqScore = 0;
+            simulatorState.history = [];
+
+            const indicator = document.getElementById("generativeRoundIndicator");
+            if (indicator) indicator.innerText = "本场景第 1/3 轮汇报";
+
+            updateBossMeters();
+            updateBossExpression();
+
+            const currentScenario = alignmentScripts[simulatorState.scenario];
+            bossSpeechText.innerText = currentScenario.rounds[1].question;
+            renderSimulatorChoices();
+        }
+
+        function changeScenario() {
+            simulatorState.scenario = scenarioSelector.value;
+            const currentScenario = alignmentScripts[simulatorState.scenario];
+            document.getElementById("bossSpeakerName").innerText = currentScenario.bossName;
+            resetSimulatorGame();
+        }
+
+
+            // 初始化渲染第一轮
+        renderSimulatorChoices();
+
+        // ==========================================================================
+        // 8.7 架构推演大沙盘 Canvas 高性能 60FPS 渲染循环与平滑插值引擎
+        // ==========================================================================
+        const telemetryCtx = telemetryCanvas.getContext("2d");
+        
+        function resizeTelemetryCanvas() {
+            const rect = telemetryCanvas.getBoundingClientRect();
+            telemetryCanvas.width = rect.width * window.devicePixelRatio;
+            telemetryCanvas.height = rect.height * window.devicePixelRatio;
+            telemetryCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        
+        resizeTelemetryCanvas();
+        window.addEventListener("resize", resizeTelemetryCanvas);
+
+        function runTelemetrySimulationLoop() {
+            // 1. 线性插值平滑过渡 (Lerp)
+            simCurrent.tps += (simTargets.tps - simCurrent.tps) * 0.08;
+            simCurrent.latency += (simTargets.latency - simCurrent.latency) * 0.08;
+            simCurrent.cpu += (simTargets.cpu - simCurrent.cpu) * 0.08;
+            
+            // 2. 注入高频微小随机抖动，增加现实并发感
+            const jitterFactor = simCurrent.cpu > 80 ? 2.5 : 0.5;
+            const tpsJitter = (Math.random() - 0.5) * 50 * jitterFactor;
+            const latencyJitter = (Math.random() - 0.5) * 0.4 * jitterFactor;
+            const cpuJitter = (Math.random() - 0.5) * 0.3 * jitterFactor;
+            
+            const displayTps = Math.max(100, Math.round(simCurrent.tps + tpsJitter));
+            const displayLatency = Math.max(0.5, simCurrent.latency + latencyJitter);
+            const displayCpu = Math.max(0, Math.min(100, simCurrent.cpu + cpuJitter));
+            
+            // 3. 同步数字表盘显示
+            const liveTpsEl = document.getElementById("liveGaugeTps");
+            const liveLatEl = document.getElementById("liveGaugeLatency");
+            const liveCpuEl = document.getElementById("liveGaugeCpu");
+            
+            const sc = architectureScenarios[activeScenario.current];
+            const unit1 = sc.metrics.m1.unit;
+            
+            if (liveTpsEl) liveTpsEl.innerText = `${displayTps} /s`;
+            if (liveLatEl) liveLatEl.innerText = `${displayLatency.toFixed(displayLatency > 9.9 ? 1 : 2)} ${unit1}`;
+            if (liveCpuEl) liveCpuEl.innerText = `${Math.round(displayCpu)} %`;
+            
+            // 4. 同步状态标识与红色高危闪烁
+            const statusTag = document.getElementById("sandboxStatusTag");
+            const alertBox = document.getElementById("sandboxAlertBox");
+            
+            if (statusTag && alertBox) {
+                if (displayCpu >= 90) {
+                    if (activeScenario.current === "flash_sale") {
+                        statusTag.innerText = "💥 数据库雪崩";
+                    } else if (activeScenario.current === "log_stream") {
+                        statusTag.innerText = "💥 计算集群溢流";
+                    } else {
+                        statusTag.innerText = "💥 Inbox 写雪崩";
+                    }
+                    statusTag.className = "card-tag tag-danger";
+                    alertBox.style.opacity = "1";
+                    alertBox.style.animation = "redGlowPulse 0.8s infinite";
+                } else if (displayCpu >= 75) {
+                    if (activeScenario.current === "flash_sale") {
+                        statusTag.innerText = "⚠️ 高水位负载";
+                    } else if (activeScenario.current === "log_stream") {
+                        statusTag.innerText = "⚠️ 数据背压警告";
+                    } else {
+                        statusTag.innerText = "⚠️ 内存高爆警告";
+                    }
+                    statusTag.className = "card-tag tag-warning";
+                    alertBox.style.opacity = "0.5";
+                    alertBox.style.animation = "none";
+                } else {
+                    if (activeScenario.current === "flash_sale") {
+                        statusTag.innerText = "🟢 正常交付";
+                    } else if (activeScenario.current === "log_stream") {
+                        statusTag.innerText = "🟢 流管道畅通";
+                    } else {
+                        statusTag.innerText = "🟢 Feed 稳健渲染";
+                    }
+                    statusTag.className = "card-tag tag-success";
+                    alertBox.style.opacity = "0";
+                    alertBox.style.animation = "none";
+                }
+            }
+            
+            // 5. 追加历史记录缓冲区
+            telemetryHistory.push({
+                tps: displayTps,
+                latency: displayLatency,
+                cpu: displayCpu
+            });
+            
+            if (telemetryHistory.length > maxHistoryPoints) {
+                telemetryHistory.shift();
+            }
+            
+            // 6. 开始绘制 Canvas 折线图
+            const w = telemetryCanvas.width / window.devicePixelRatio;
+            const h = telemetryCanvas.height / window.devicePixelRatio;
+            
+            telemetryCtx.clearRect(0, 0, w, h);
+            
+            // A. 绘制科幻网格背景
+            telemetryCtx.strokeStyle = "rgba(0, 242, 254, 0.04)";
+            telemetryCtx.lineWidth = 1;
+            
+            // 纵向网格线向左平滑偏移滚动
+            const scrollOffset = (Date.now() / 40) % 20;
+            for (let x = -scrollOffset; x < w; x += 20) {
+                telemetryCtx.beginPath();
+                telemetryCtx.moveTo(x, 0);
+                telemetryCtx.lineTo(x, h);
+                telemetryCtx.stroke();
+            }
+            
+            // 横向网格线
+            for (let y = 0; y < h; y += 30) {
+                telemetryCtx.beginPath();
+                telemetryCtx.moveTo(0, y);
+                telemetryCtx.lineTo(w, y);
+                telemetryCtx.stroke();
+            }
+            
+            // B. 绘制坐标轴
+            telemetryCtx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            telemetryCtx.lineWidth = 1;
+            telemetryCtx.beginPath();
+            telemetryCtx.moveTo(15, 0);
+            telemetryCtx.lineTo(15, h - 15);
+            telemetryCtx.moveTo(15, h - 15);
+            telemetryCtx.lineTo(w, h - 15);
+            telemetryCtx.stroke();
+            
+            // C. 绘制折线曲线 (根据当前场景最大极值进行自适应缩放)
+            if (telemetryHistory.length > 1) {
+                let maxTpsLimit = 9000;
+                let maxLatencyLimit = 120;
+                
+                if (activeScenario.current === "log_stream") {
+                    maxTpsLimit = 27000;
+                    maxLatencyLimit = 800;
+                } else if (activeScenario.current === "social_feed") {
+                    maxTpsLimit = 12500;
+                    maxLatencyLimit = 500;
+                }
+                
+                // 1. 核心负载折线 (琥珀金 `#ffb800`，满分 100%)
+                drawTelemetryCurve(telemetryHistory, p => p.cpu, 0, 100, "#ffb800", w, h);
+                // 2. 吞吐量折线 (科幻青 `#00f2fe`)
+                drawTelemetryCurve(telemetryHistory, p => p.tps, 0, maxTpsLimit, "#00f2fe", w, h);
+                // 3. 延迟折线 (热烈洋红 `#ff0055`)
+                drawTelemetryCurve(telemetryHistory, p => p.latency, 0, maxLatencyLimit, "#ff0055", w, h);
+            }
+            
+            // D. 绘制图例与数字化面板
+            telemetryCtx.font = "10px monospace";
+            telemetryCtx.textAlign = "left";
+            
+            telemetryCtx.fillStyle = "#ffb800";
+            telemetryCtx.fillText(sc.legends.l1, 25, 18);
+            
+            telemetryCtx.fillStyle = "#00f2fe";
+            telemetryCtx.fillText(sc.legends.l2, 140, 18);
+            
+            telemetryCtx.fillStyle = "#ff0055";
+            telemetryCtx.fillText(sc.legends.l3, 255, 18);
+            
+            requestAnimationFrame(runTelemetrySimulationLoop);
+        }
+        
+        function drawTelemetryCurve(history, valExtractor, minVal, maxVal, color, w, h) {
+            telemetryCtx.beginPath();
+            telemetryCtx.strokeStyle = color;
+            telemetryCtx.lineWidth = 2.0;
+            telemetryCtx.shadowColor = color;
+            telemetryCtx.shadowBlur = 6;
+            
+            const paddingLeft = 15;
+            const paddingBottom = 15;
+            const paddingTop = 28;
+            
+            const graphW = w - paddingLeft;
+            const graphH = h - paddingTop - paddingBottom;
+            const pointsCount = history.length;
+            
+            for (let i = 0; i < pointsCount; i++) {
+                const val = valExtractor(history[i]);
+                const pctY = Math.min(1.0, Math.max(0.0, (val - minVal) / (maxVal - minVal)));
+                
+                const x = w - ((pointsCount - 1 - i) * (graphW / (maxHistoryPoints - 1)));
+                const y = h - paddingBottom - (pctY * graphH);
+                
+                if (i === 0) {
+                    telemetryCtx.moveTo(x, y);
+                } else {
+                    telemetryCtx.lineTo(x, y);
+                }
+            }
+            telemetryCtx.stroke();
+            telemetryCtx.shadowBlur = 0; // 重置发光阴影
+        }
+
+        // 启动推演大盘渲染循环
+        runTelemetrySimulationLoop();
+
+        // ==========================================================================
+        // PWA Service Worker 极客离线闭包注册器
+        // ==========================================================================
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js")
+                    .then(registration => {
+                        console.log("ServiceWorker 注册成功，作用域: ", registration.scope);
+                        
+                        // 循环监控 SW 状态，一旦控制权接管，立刻亮起荧光绿状态呼吸灯
+                        const updatePwaBadge = () => {
+                            const badge = document.getElementById("pwaOfflineBadge");
+                            const text = document.getElementById("pwaOfflineText");
+                            
+                            if (badge && text) {
+                                if (navigator.serviceWorker.controller) {
+                                    badge.classList.add("ready");
+                                    text.innerText = "离线通勤已就绪";
+                                } else {
+                                    // 处于激活但还未接管状态
+                                    badge.classList.remove("ready");
+                                    text.innerText = "正在激活通勤包...";
+                                }
+                            }
+                        };
+                        
+                        // 首次运行
+                        updatePwaBadge();
+                        
+                        // 监听控制器改变，接管瞬间热切状态
+                        navigator.serviceWorker.addEventListener("controllerchange", () => {
+                            console.log("[PWA] 离线通勤控制器接管成功！正在点亮极客呼吸灯。");
+                            updatePwaBadge();
+                        });
+                        
+                        // 监听状态变更
+                        if (registration.installing) {
+                            registration.installing.addEventListener("statechange", updatePwaBadge);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("ServiceWorker 注册失败: ", err);
+                        const text = document.getElementById("pwaOfflineText");
+                        if (text) text.innerText = "通勤包拉取异常";
+                    });
+            });
+        } else {
+            console.log("当前浏览器或本地非安全上下文不支持 ServiceWorker！启用常规沙箱运行。");
+            const text = document.getElementById("pwaOfflineText");
+            if (text) text.innerText = "不支持离线通勤";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# IDE and System Files
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Python Runtime and Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+venv/
+env/
+dist/
+build/
+*.egg-info/
+
+# DevZen Toolchain & Database Logs
+db.sqlite3
+*.log
+tmp/
+.tempmediaStorage/
